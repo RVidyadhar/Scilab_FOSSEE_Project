@@ -1,11 +1,14 @@
-/*
- * Quadratic Programming Toolbox for Scilab using IPOPT library
- * Authors :
-	Sai Kiran
-	Keyur Joshi
-	Iswarya
-	Harpreet Singh
- */
+// Copyright (C) 2015 - IIT Bombay - FOSSEE
+//
+// Author: R.Vidyadhar & Vignesh Kannan
+// Organization: FOSSEE, IIT Bombay
+// Email: rvidhyadar@gmail.com & vignesh2496@gmail.com
+// This file must be used under the terms of the CeCILL.
+// This source file is licensed as described in the file COPYING, which
+// you should have received as part of this distribution.  The terms
+// are also available at
+// http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
+
 
 #include "sci_iofunc.hpp"
 #include "IpIpoptApplication.hpp"

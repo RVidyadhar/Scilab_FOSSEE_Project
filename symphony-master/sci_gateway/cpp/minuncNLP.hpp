@@ -1,7 +1,14 @@
-//NAME    : VIGNESH K
-//DATE    : 18/11/2015
-//COLLEGE : NATIONAL INSTITUTE OF TECHNOLOGY KARNATAKA
-//BRANCH  : COMPUTER SCIENCE AND ENGINEERING, B.Tech 2nd YEAR 
+// Copyright (C) 2015 - IIT Bombay - FOSSEE
+//
+// Author: R.Vidyadhar & Vignesh Kannan
+// Organization: FOSSEE, IIT Bombay
+// Email: rvidhyadar@gmail.com & vignesh2496@gmail.com
+// This file must be used under the terms of the CeCILL.
+// This source file is licensed as described in the file COPYING, which
+// you should have received as part of this distribution.  The terms
+// are also available at
+// http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
+
 
 #ifndef __minuncNLP_HPP__
 #define __minuncNLP_HPP__
