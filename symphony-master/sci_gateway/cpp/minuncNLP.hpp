@@ -17,6 +17,8 @@ class minuncNLP : public TNLP
 
   	Index numConstr_;                //Number of constraints 
 
+	Index flag_;                     //Used for considering different cases of options specified by the user
+
   	const Number *varGuess_= NULL;	 //varGuess_ is a pointer to a matrix of size of 1*numVars_
 				         //with initial guess of all variables.
 
@@ -44,7 +46,7 @@ class minuncNLP : public TNLP
 	public:
 
   	/** user defined constructor */
-  	minuncNLP(Index nV, Index nC,Number *x0):numVars_(nV),numConstr_(nC),varGuess_(x0),finalX_(0),finalGradient_(0),finalHessian_(0),finalObjVal_(1e20){	}
+  	minuncNLP(Index nV, Index nC,Number *x0,Index f):numVars_(nV),numConstr_(nC),varGuess_(x0),flag_(f),finalX_(0),finalGradient_(0),finalHessian_(0),finalObjVal_(1e20){	}
 
   	/** default destructor */
   	virtual ~minuncNLP();

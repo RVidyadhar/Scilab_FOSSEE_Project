@@ -21,23 +21,23 @@ extern "C"
 #include <iostream>
 
 using namespace std;
-//Global variables
-
 
 int sci_solveminuncp(char *fname)
 {
 	using namespace Ipopt;
 
-	CheckInputArgument(pvApiCtx, 4, 4); // We need total 4 input arguments.
+	CheckInputArgument(pvApiCtx, 5, 7);
 	CheckOutputArgument(pvApiCtx, 6, 6);
 	
 	// Error management variable
 	SciErr sciErr;
 
-	//Function pointers and input matrix(Starting point) pointer 
+	//Function pointers, input matrix(Starting point) pointer, flag variable 
 	int* funptr=NULL;
 	int* gradhesptr=NULL;
 	double* x0ptr=NULL;
+	double flag;
+        
 
         // Input arguments
 	double *cpu_time=NULL,*max_iter=NULL;
@@ -84,13 +84,18 @@ int sci_solveminuncp(char *fname)
 		return 1;
 	}
 
+	if(getDoubleFromScilab(5, &flag))
+	{
+		return 1;
+	}
+
         //Initialization of parameters
 	nVars=x0_cols;
 	nCons=0;
         
         // Starting Ipopt
 
-	SmartPtr<minuncNLP> Prob = new minuncNLP(nVars, nCons,x0ptr);
+	SmartPtr<minuncNLP> Prob = new minuncNLP(nVars, nCons, x0ptr, flag);
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 	app->RethrowNonIpoptException(true);
 
@@ -99,13 +104,6 @@ int sci_solveminuncp(char *fname)
 	app->Options()->SetNumericValue("tol", 1e-7);
 	app->Options()->SetIntegerValue("max_iter", (int)*max_iter);
 	app->Options()->SetNumericValue("max_cpu_time", *cpu_time);
-	//app->Options()->SetStringValue("mu_strategy", "adaptive");
-	// Indicates whether all equality constraints are linear 
-	//app->Options()->SetStringValue("jac_c_constant", "yes");
-	// Indicates whether all inequality constraints are linear 
-	//app->Options()->SetStringValue("jac_d_constant", "yes");	
-	// Indicates whether the problem is a quadratic problem 
-	//app->Options()->SetStringValue("hessian_constant", "yes");
 
 	///////// Initialize the IpoptApplication and process the options /////////
 	ApplicationReturnStatus status;

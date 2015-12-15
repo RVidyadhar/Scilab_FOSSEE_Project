@@ -13,11 +13,8 @@ extern "C"
 #include <string.h>
 #include <assert.h>
 #include <iostream>
+
 using namespace std;
-//#include <call_scilab.h>
-
-//double x_static,i, *op_obj_x = NULL,*op_obj_value = NULL;
-
 using namespace Ipopt;
 
 minuncNLP::~minuncNLP()
@@ -88,7 +85,7 @@ bool minuncNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
   	{
 		return 1;
  	}
-  	char name[20]="fun_";
+  	char name[20]="_f";
   	double obj=0;
   	double *xNew=x;
   	createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
@@ -114,27 +111,49 @@ bool minuncNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
 //get value of gradient of objective function at vector x.
 bool minuncNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f)
 {
-  	int* gradhesptr=NULL;
-  	if(getFunctionFromScilab(2,&gradhesptr))
-  	{
-		return 1;
-  	}  
-  	double *xNew=x;
-  	double t=1;
-  	createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
-  	createScalarDouble(pvApiCtx, 4,t);
-  	int positionFirstElementOnStackForScilabFunction = 3;
-  	int numberOfRhsOnScilabFunction = 2;
-  	int numberOfLhsOnScilabFunction = 1;
-  	int pointerOnScilabFunction     = *gradhesptr;
-	char name[20]="gradhess_";
+  	if (flag_==1 || flag_==3)
+  	{	
+  		int* gradhessptr=NULL;
+  		if(getFunctionFromScilab(2,&gradhessptr))
+  		{
+			return 1;
+  		}  
+  		double *xNew=x;
+  		double t=1;
+  		createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
+  		createScalarDouble(pvApiCtx, 4,t);
+  		int positionFirstElementOnStackForScilabFunction = 3;
+  		int numberOfRhsOnScilabFunction = 2;
+  		int numberOfLhsOnScilabFunction = 1;
+  		int pointerOnScilabFunction     = *gradhessptr;
+		char name[20]="_gradhess";
  
-  	C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
+  		C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
                                                                &numberOfLhsOnScilabFunction,
                                                                &numberOfRhsOnScilabFunction,(unsigned long)strlen(name));
- 
-                               
-  	double* resg;  
+  	}
+
+  	else if (flag_==2 || flag_==4)
+  	{
+  		int* gradptr=NULL;
+  		if(getFunctionFromScilab(6,&gradptr))
+  		{
+			return 1;
+  		}  
+  		double *xNew=x;
+	  	createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
+  		int positionFirstElementOnStackForScilabFunction = 3;
+  		int numberOfRhsOnScilabFunction = 1;
+  		int numberOfLhsOnScilabFunction = 1;
+  		int pointerOnScilabFunction     = *gradptr;
+		char name[20]="_g";
+ 	
+  		C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
+        	                                                       &numberOfLhsOnScilabFunction,
+        	                                                       &numberOfRhsOnScilabFunction,(unsigned long)strlen(name));
+   	}
+
+	double* resg;  
   	int x0_rows,x0_cols;                           
   	if(getDoubleMatrixFromScilab(3, &x0_rows, &x0_cols, &resg))
   	{
@@ -173,14 +192,9 @@ bool minuncNLP::get_starting_point(Index n, bool init_x, Number* x,bool init_z, 
  * or the values of the Hessian of the Lagrangian  for the given values for
  * x,lambda,obj_factor.
 */
+
 bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, Index m, const Number* lambda,bool new_lambda, Index nele_hess, Index* iRow,Index* jCol, Number* values)
 {
-	int* gradhesptr=NULL;
-	if(getFunctionFromScilab(2,&gradhesptr))
-	{
-		return 1;
-	}   
-
 	if (values==NULL)
 	{
 		Index idx=0;
@@ -194,25 +208,73 @@ bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 		  	}
 		}
 	}
+
 	else 
 	{
+		if(flag_==1 || flag_==2)
+	  	{
+			int* gradhessptr=NULL;
+			if(getFunctionFromScilab(2,&gradhessptr))
+			{
+				return 1;
+			}          	
+			double *xNew=x;
+  			double t=2;
+			createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
+  			createScalarDouble(pvApiCtx, 4,t);
+  			int positionFirstElementOnStackForScilabFunction = 3;
+  			int numberOfRhsOnScilabFunction = 2;
+  			int numberOfLhsOnScilabFunction = 1;
+  			int pointerOnScilabFunction     = *gradhessptr;
+			char name[20]="_gradhess";
+  	
+  			C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
+                	                                               &numberOfLhsOnScilabFunction,
+                	                                               &numberOfRhsOnScilabFunction,(unsigned long)strlen(name));
+ 	    	}	
 
-		double *xNew=x;
-  		double t=2;
-	
-  		createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
-  		createScalarDouble(pvApiCtx, 4,t);
-  		int positionFirstElementOnStackForScilabFunction = 3;
-  		int numberOfRhsOnScilabFunction = 2;
-  		int numberOfLhsOnScilabFunction = 1;
-  		int pointerOnScilabFunction     = *gradhesptr;
-		char name[20]="gradhess_";
-  
-  		C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
-                                                               &numberOfLhsOnScilabFunction,
-                                                               &numberOfRhsOnScilabFunction,(unsigned long)strlen(name));
-                               
-  		double* resh;  
+ 	    	else if (flag_==3)
+ 	    	{		
+			int* hessptr=NULL;
+			if(getFunctionFromScilab(6,&hessptr))
+			{
+				return 1;
+			}          	
+			double *xNew=x;	
+  			createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
+  			int positionFirstElementOnStackForScilabFunction = 3;
+  			int numberOfRhsOnScilabFunction = 1;
+  			int numberOfLhsOnScilabFunction = 1;
+  			int pointerOnScilabFunction     = *hessptr;
+			char name[20]="_h";
+  	
+  			C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
+                	                                               &numberOfLhsOnScilabFunction,
+                	                                               &numberOfRhsOnScilabFunction,(unsigned long)strlen(name));	
+ 	    	}	
+
+ 	    	else if (flag_==4)
+ 	    	{		
+ 	    		int j;
+			int* hessptr=NULL;
+			if(getFunctionFromScilab(7,&hessptr))
+			{
+				return 1;
+			}          	
+			double *xNew=x;	
+  			createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
+  			int positionFirstElementOnStackForScilabFunction = 3;
+  			int numberOfRhsOnScilabFunction = 1;
+  			int numberOfLhsOnScilabFunction = 1;
+  			int pointerOnScilabFunction     = *hessptr;
+			char name[20]="_h";
+  	
+  			C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
+                	                                               &numberOfLhsOnScilabFunction,
+                	                                               &numberOfRhsOnScilabFunction,(unsigned long)strlen(name));
+               	 }
+
+	        double* resh;  
   		int x0_rows,x0_cols;                           
   		if(getDoubleMatrixFromScilab(3, &x0_rows, &x0_cols, &resh))
 		{
@@ -230,12 +292,12 @@ bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 		}
 
 		Index i;
-  		for(i=0;i<numVars_*numVars_;i++)
-  		{
-        		finalHessian_[i]=resh[i];
- 		}
-	}
-	
+		for(i=0;i<numVars_*numVars_;i++)
+		{
+       			finalHessian_[i]=resh[i];
+		}	
+	}	
+
        	return true;
 }
 
@@ -288,4 +350,6 @@ int minuncNLP::returnStatus()
 }
 
 }
+
+
 
