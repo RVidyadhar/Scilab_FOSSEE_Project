@@ -7,9 +7,10 @@
 // This source file is licensed as described in the file COPYING, which
 // you should have received as part of this distribution.  The terms
 // are also available at
-// http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt#include "minuncNLP.hpp"
+// http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
 
 
+#include "minuncNLP.hpp"
 #include "IpIpoptData.hpp"
 #include "sci_iofunc.hpp"
 
