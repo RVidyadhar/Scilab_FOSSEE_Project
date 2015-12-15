@@ -70,6 +70,7 @@ list_functions = [ 'sym_open';
                    'sym_getConstrActivity';
                    'solveqp';
                    'solveminuncp';
+                   'solveminbndp';
 ];
 addinter(libFAMOS_path + filesep() + 'libFAMOS' + getdynlibext(), 'libFAMOS', list_functions);
 // remove temp. variables on stack

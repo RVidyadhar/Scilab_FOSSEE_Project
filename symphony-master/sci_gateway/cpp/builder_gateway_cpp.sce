@@ -111,8 +111,9 @@ Function_Names = [
 		//QP function
 		"solveqp","sci_solveqp"
 
-		//fminunc function
+		//fminunc function and fminbnd function
 		"solveminuncp","sci_solveminuncp"
+		"solveminbndp","sci_solveminbndp"
 	];
 
 //Name of all the files to be compiled
@@ -147,6 +148,9 @@ Files = [
 		"minuncNLP.hpp"
 		"sci_minuncNLP.cpp"
 		"sci_ipoptfminunc.cpp"
+		"minbndNLP.hpp"
+		"sci_minbndNLP.cpp"
+		"sci_ipoptfminbnd.cpp"
 		
 				
 	]
