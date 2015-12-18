@@ -48,8 +48,8 @@ bool minbndNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g, Index& nnz_h_
 //get variable and constraint bound info
 bool minbndNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u)
 {	
-	x_l[0]=varLB_[0]+1.0e-6;
-	x_u[0]=varUB_[0]-1.0e-6;
+	x_l[0]=varLB_[0];
+	x_u[0]=varUB_[0];
 
         g_l=NULL;
         g_u=NULL;
@@ -158,6 +158,7 @@ bool minbndNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f
 // This method sets initial values for required vectors . For now we are assuming 0 to all values. 
 bool minbndNLP::get_starting_point(Index n, bool init_x, Number* x,bool init_z, Number* z_L, Number* z_U,Index m, bool init_lambda,Number* lambda)
 {
+	x[0]=0;
 	return true;
 }
 

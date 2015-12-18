@@ -10,13 +10,13 @@
 // http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
 
 
-#ifndef __minuncNLP_HPP__
-#define __minuncNLP_HPP__
+#ifndef __minconNLP_HPP__
+#define __minconNLP_HPP__
 #include "IpTNLP.hpp"
 
 using namespace Ipopt;
 
-class minuncNLP : public TNLP
+class minconNLP : public TNLP
 {
 	private:
 
@@ -24,12 +24,60 @@ class minuncNLP : public TNLP
 
   	Index numConstr_;                //Number of constraints 
 
-	Number flag_;                     //Used for considering different cases of options specified by the user
+	Number flag1_;                   //Used for considering different cases of options specified by the user
+
+        Number flag2_;
+
+	Number flag3_;
+
+	Number nonlinCon_;
+
+	Number nonlinIneqCon_;
+
+	const Number *A_= NULL;
+
+	const Number *b_= NULL;
+
+	const Number *Aeq_= NULL;
+
+	const Number *beq_= NULL;
+
+	Index Arows_;
+
+	Index Acols_;
+
+	Index brows_;
+
+	Index bcols_;
+
+	Index Aeqrows_;
+
+	Index Aeqcols_;
+
+	Index beqrows_;
+
+	Index beqcols_;
+	
 
   	const Number *varGuess_= NULL;	 //varGuess_ is a pointer to a matrix of size of 1*numVars_
 				         //with initial guess of all variables.
 
-  	Number *finalX_= NULL;           //finalX_ is a pointer to a matrix of size of 1*numVars_
+	const Number *varUB_= NULL;	 //varUB_ is a pointer to a matrix of size of 1*numVar_ 
+					 // with upper bounds of all variables.
+
+	const Number *varLB_= NULL;	 //varLB_ is a pointer to a matrix of size of 1*numVar_
+					 // with lower bounds of all variables.
+
+	Number *finalZl_= NULL;		 //finalZl_ is a pointer to a matrix of size of 1*numVar_
+					 // with final values for the lower bound multipliers
+
+	Number *finalZu_= NULL;		 //finalZu_ is a pointer to a matrix of size of 1*numVar_
+					 // with final values for the upper bound multipliers
+
+	Number *finalLambda_= NULL;	 //finalLambda_ is a pointer to a matrix of size of 1*numConstr_
+					 // with final values for the upper bound multipliers
+
+	Number *finalX_= NULL;           //finalX_ is a pointer to a matrix of size of 1*numVars_
 				         //with final value for the primal variables.
 
   	Number *finalGradient_=NULL;     //finalGradient_ is a pointer to a matrix of size of numVars_*numVars_
@@ -47,16 +95,16 @@ class minuncNLP : public TNLP
   	int status_;			 //Solver return status
 
 
-  	minuncNLP(const minuncNLP&);
-  	minuncNLP& operator=(const minuncNLP&);
+  	minconNLP(const minconNLP&);
+  	minconNLP& operator=(const minconNLP&);
 
 	public:
 
   	/** user defined constructor */
-  	minuncNLP(Index nV, Index nC,Number *x0,Number f):numVars_(nV),numConstr_(nC),varGuess_(x0),flag_(f),finalX_(0),finalGradient_(0),finalHessian_(0),finalObjVal_(1e20){	}
+  	minconNLP(Index nV, Index nC, Number *x0 ,Number *A, Number *b, Number* Aeq, Number *beq, Index Arows, Index Acols, Index brows, Index bcols, Index Aeqrows, Index Aeqcols, Index beqrows, Index beqcols, Number* LB, Number* UB, Number nlC, Number nlIC, Number f1, Number f2, Number f3) : numVars_(nV), numConstr_(nC), varGuess_(x0), A_(A), b_(b), Aeq_(Aeq), beq_(beq), Arows_(Arows), Acols_(Acols), brows_(brows), bcols_(bcols), Aeqrows_(Aeqrows), Aeqcols_(Aeqcols), beqrows_(beqrows), beqcols_(beqcols), varLB_(LB), varUB_(UB), nonlinCon_(nlC), nonlinIneqCon_(nlIC), flag1_(f1), flag2_(f2), flag3_(f3), finalX_(0), finalZl_(0), finalZu_(0), finalGradient_(0), finalHessian_(0), finalObjVal_(1e20){	}
 
   	/** default destructor */
-  	virtual ~minuncNLP();
+  	virtual ~minconNLP();
 
   	/** Method to return some info about the nlp */
   	virtual bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
@@ -104,6 +152,14 @@ class minuncNLP : public TNLP
 
   	const double * getHess();       //Returns a pointer to a matrix of size of numVars_*numVars_ 
 					//with final value of hessian for the primal variables.
+	
+	const double * getZl();
+
+	
+	const double * getZu();
+
+
+	const double * getLambda();
 
   	double getObjVal();		//Returns the output of the final value of the objective.
 

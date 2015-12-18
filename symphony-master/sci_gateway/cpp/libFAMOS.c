@@ -67,6 +67,7 @@ extern Gatefunc sci_sym_getRowActivity;
 extern Gatefunc sci_solveqp;
 extern Gatefunc sci_solveminuncp;
 extern Gatefunc sci_solveminbndp;
+extern Gatefunc sci_solveminconp;
 static GenericTable Tab[]={
   {(Myinterfun)sci_gateway,sci_sym_open,"sym_open"},
   {(Myinterfun)sci_gateway,sci_sym_close,"sym_close"},
@@ -129,6 +130,7 @@ static GenericTable Tab[]={
   {(Myinterfun)sci_gateway,sci_solveqp,"solveqp"},
   {(Myinterfun)sci_gateway,sci_solveminuncp,"solveminuncp"},
   {(Myinterfun)sci_gateway,sci_solveminbndp,"solveminbndp"},
+  {(Myinterfun)sci_gateway,sci_solveminconp,"solveminconp"},
 };
  
 int C2F(libFAMOS)()

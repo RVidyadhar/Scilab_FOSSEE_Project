@@ -12,7 +12,7 @@
 
 #include "sci_iofunc.hpp"
 #include "IpIpoptApplication.hpp"
-#include "minuncNLP.hpp"
+#include "minconNLP.hpp"
 
 extern "C"
 {
@@ -25,12 +25,12 @@ extern "C"
 
 using namespace std;
 
-int sci_solveminuncp(char *fname)
+int sci_solveminconp(char *fname)
 {
 	using namespace Ipopt;
 
-	CheckInputArgument(pvApiCtx, 5, 7);
-	CheckOutputArgument(pvApiCtx, 6, 6);
+	CheckInputArgument(pvApiCtx, 19, 19);
+	CheckOutputArgument(pvApiCtx, 7, 7);
 	
 	// Error management variable
 	SciErr sciErr;
@@ -38,20 +38,21 @@ int sci_solveminuncp(char *fname)
 	//Function pointers, input matrix(Starting point) pointer, flag variable 
 	int* funptr=NULL;
 	int* gradhesptr=NULL;
-	double* x0ptr=NULL;
-	double flag;
+	double *x0ptr=NULL, *lbptr=NULL, *ubptr=NULL,*Aptr=NULL, *bptr=NULL, *Aeqptr=NULL, *beqptr=NULL;
+	double flag1=0,flag2=0,flag3=0,nonlinCon=0,nonlinIneqCon=0;
         
 
         // Input arguments
 	double *cpu_time=NULL,*max_iter=NULL;
 	static unsigned int nVars = 0,nCons = 0;
 	unsigned int temp1 = 0,temp2 = 0, iret = 0;
-	int x0_rows, x0_cols;
+	int x0_rows=0, x0_cols=0, lb_rows=0, lb_cols=0, ub_rows=0, ub_cols=0, A_rows=0, A_cols=0, b_rows=0, b_cols=0, Aeq_rows=0, Aeq_cols=0, beq_rows=0, beq_cols=0;
 	
 	// Output arguments
 	double *fX = NULL, ObjVal=0,iteration=0;
-	double *fGrad=  NULL;
-	double *fHess=  NULL;
+	double *fGrad =  NULL;
+	double *fHess =  NULL;
+	double *fLambda = NULL;
 	int rstatus = 0;
 
 	////////// Manage the input argument //////////
@@ -69,36 +70,84 @@ int sci_solveminuncp(char *fname)
 	}
 
 	//x0(starting point) matrix from scilab
-	if(getDoubleMatrixFromScilab(3, &x0_rows, &x0_cols, &x0ptr))
+	if(getDoubleMatrixFromScilab(18, &x0_rows, &x0_cols, &x0ptr))
 	{
 		return 1;
 	}
 
-       
         //Getting number of iterations
-        if(getFixedSizeDoubleMatrixInList(4,2,temp1,temp2,&max_iter))
+        if(getFixedSizeDoubleMatrixInList(19,2,temp1,temp2,&max_iter))
 	{
 		return 1;
 	}
 
 	//Getting Cpu Time
-	if(getFixedSizeDoubleMatrixInList(4,4,temp1,temp2,&cpu_time))
+	if(getFixedSizeDoubleMatrixInList(19,4,temp1,temp2,&cpu_time))
 	{
 		return 1;
 	}
 
-	if(getDoubleFromScilab(5, &flag))
+	if(getDoubleMatrixFromScilab(3, &A_rows, &A_cols, &Aptr))
 	{
 		return 1;
 	}
 
-        //Initialization of parameters
-	nVars=x0_cols;
-	nCons=0;
+	if(getDoubleMatrixFromScilab(4, &b_rows, &b_cols, &bptr))
+	{
+		return 1;
+	}
+
+	if(getDoubleMatrixFromScilab(5, &Aeq_rows, &Aeq_cols, &Aeqptr))
+	{
+		return 1;
+	}
+
+	if(getDoubleMatrixFromScilab(6, &beq_rows, &beq_cols, &beqptr))
+	{
+		return 1;
+	}
+
+	if(getDoubleMatrixFromScilab(7, &lb_rows, &lb_cols, &lbptr))
+	{
+		return 1;
+	}
+
+	if(getDoubleMatrixFromScilab(8, &ub_rows, &ub_cols, &ubptr))
+	{
+		return 1;
+	}
+
+	if(getDoubleFromScilab(9, &nonlinCon))
+	{
+		return 1;
+	}
+
+	if(getDoubleFromScilab(10, &nonlinIneqCon))
+	{
+		return 1;
+	}
+
+	if(getDoubleFromScilab(12, &flag1))
+	{
+		return 1;
+	}
+
+	if(getDoubleFromScilab(14, &flag2))
+	{
+		return 1;
+	}
+
+	if(getDoubleFromScilab(16, &flag3))
+	{
+		return 1;
+	}
+
+	nVars = x0_cols;
+	nCons = A_rows + Aeq_rows + nonlinCon;
         
         // Starting Ipopt
 
-	SmartPtr<minuncNLP> Prob = new minuncNLP(nVars, nCons, x0ptr, flag);
+	SmartPtr<minconNLP> Prob = new minconNLP(nVars, nCons, x0ptr, Aptr, bptr, Aeqptr, beqptr, A_rows, A_cols, b_rows, b_cols, Aeq_rows, Aeq_cols, beq_rows, beq_cols, lbptr, ubptr, nonlinCon, nonlinIneqCon, flag1, flag2, flag3);
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 	app->RethrowNonIpoptException(true);
 
@@ -128,6 +177,7 @@ int sci_solveminuncp(char *fname)
 	fX = Prob->getX();
 	fGrad = Prob->getGrad();
 	fHess = Prob->getHess();
+	fLambda = Prob->getLambda();
 	ObjVal = Prob->getObjVal();
 	iteration = Prob->iterCount();
 	if (returnDoubleMatrixToScilab(1, 1, nVars, fX))
@@ -149,13 +199,18 @@ int sci_solveminuncp(char *fname)
 	{
 		return 1;
 	}
+
+	if (returnDoubleMatrixToScilab(5, 1, nCons, fLambda))
+	{
+		return 1;
+	}
 		
-	if (returnDoubleMatrixToScilab(5, 1, nVars, fGrad))
+	if (returnDoubleMatrixToScilab(6, 1, nVars, fGrad))
 	{
 		return 1;
 	}
 
-	if (returnDoubleMatrixToScilab(6, 1, nVars*nVars, fHess))
+	if (returnDoubleMatrixToScilab(7, 1, nVars*nVars, fHess))
 	{
 		return 1;
 	}

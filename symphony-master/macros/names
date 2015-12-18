@@ -1,4 +1,5 @@
 fminbnd
+fmincon
 fminunc
 lsqlin
 qpipopt

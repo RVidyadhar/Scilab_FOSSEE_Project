@@ -114,6 +114,7 @@ Function_Names = [
 		//fminunc function and fminbnd function
 		"solveminuncp","sci_solveminuncp"
 		"solveminbndp","sci_solveminbndp"
+		"solveminconp","sci_solveminconp"
 	];
 
 //Name of all the files to be compiled
@@ -151,6 +152,9 @@ Files = [
 		"minbndNLP.hpp"
 		"sci_minbndNLP.cpp"
 		"sci_ipoptfminbnd.cpp"
+		"minconNLP.hpp"
+		"sci_minconNLP.cpp"
+		"sci_ipoptfmincon.cpp"
 		
 				
 	]

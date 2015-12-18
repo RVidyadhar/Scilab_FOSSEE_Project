@@ -67,9 +67,9 @@ bool minuncNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Numb
 // return the value of the constraints: g(x)
 bool minuncNLP::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
 {
-  // return the value of the constraints: g(x)
-  g=NULL;
-  return true;
+  	// return the value of the constraints: g(x)
+  	g=NULL;
+  	return true;
 }
 
 // return the structure or values of the jacobian
@@ -222,7 +222,7 @@ bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 	}
 
 	else 
-	{
+	{	
 		if(flag_==1 || flag_==2)
 	  	{
 			int* gradhessptr=NULL;
@@ -293,7 +293,7 @@ bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 			sciprint("No results");
 			return 1;
 		}
-
+	
 		Index index=0;
 		for (Index row=0;row < numVars_ ;++row)
 		{
@@ -324,10 +324,7 @@ void minuncNLP::finalize_solution(SolverReturn status,Index n, const Number* x, 
 
 	finalObjVal_ = obj_value;
 	status_ = status;
-	if (status_ == 0 | status_ == 1 | status_ == 2)
-	{
-		iter_ = ip_data->iter_count();
-	}
+	iter_ = ip_data->iter_count();
 }
 
 

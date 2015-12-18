@@ -354,6 +354,16 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 		end
     	end
 
+
+	//In the cases of the problem not being solved return NULL to the output matrices
+	if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then
+		xopt=[]
+		fopt=[]
+		gradient=[]
+		hessian=[]
+	end
+		
+	
 	//To print Output Message
     	select status
     
