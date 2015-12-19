@@ -161,7 +161,7 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
  
 	//To check the User Entry for Options and storing it
    	for i = 1:(size(param))/2
-       		select param(2*i-1)
+       	select param(2*i-1)
     		case "MaxIter" then
           			options(2*i) = param(2*i);    //Setting the Maximum Iteration as per user entry
        		case "CpuTime" then
@@ -339,13 +339,13 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
    	output = struct("Iterations", []);
    	output.Iterations = iter;
 
-    	//Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
-    	s=size(gradient)
-    	for i =1:s(2)
-    		for j =1:s(2)
+    //Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
+    s=size(gradient)
+    for i =1:s(2)
+    	for j =1:s(2)
 			hessian(i,j)= hessian1(j+((i-1)*s(2)))
 		end
-    	end
+    end
 
 
 	//In the cases of the problem not being solved return NULL to the output matrices
@@ -358,7 +358,7 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 		
 	
 	//To print Output Message
-    	select status
+    select status
     
     	case 0 then
         	printf("\nOptimal Solution Found.\n");
@@ -394,7 +394,9 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
         	printf("\nInvalid status returned. Notify the Toolbox authors\n");
         	break;
     	end
-    	if (flag==2 |flag==3 |flag==4) then
+    	
+    	//Remark for the user, If the gradient and hessian is send by the User
+    if (flag==2 |flag==3 |flag==4) then
 		disp("||||||Please Make sure you have entered Correct Functions for Gradient or Hessian -->Scilab Will Calculate Based on your input only||||||");
-    	end	
+    end	
 endfunction

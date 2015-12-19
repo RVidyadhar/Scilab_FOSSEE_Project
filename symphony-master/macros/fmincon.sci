@@ -37,15 +37,17 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   //   Parameters
   //   _f : a function, represents objective function of the problem 
   //   x0 : a vector of doubles, contains starting of variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
-  //   A : a matrix of doubles, contains coefficients of Linear Inequality Constraints of size (m X n) where 'm' is the no. of Linear Inequality Constraint & 'n' is the no. 			   of Variables
+  //   A : a matrix of doubles, contains coefficients of Linear Inequality Constraints of size (m X n) where 'm' is the no. of Linear Inequality Constraint & 'n' is the 
+  //       no. of Variables
   //   b : a vector of doubles, related to 'A' and contains the rhs of the Linear Inequality Constraints of size (m X 1)
-  //   Aeq : a matrix of doubles, contains coefficients of Linear Equality Constraints of size (m1 X n) where 'm1' is the no. of Linear Equality Constraint & 'n' is the 				 no. of Variables
+  //   Aeq : a matrix of doubles, contains coefficients of Linear Equality Constraints of size (m1 X n) where 'm1' is the no. of Linear Equality Constraint & 'n' is the 
+  //         no. of Variables
   //   beq : a vector of doubles, related to 'Aeq' and contains the rhs of the Linear Equality Constraints of size (m1 X 1)
   //   lb : a vector of doubles, contains lower bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
   //   ub : a vector of doubles, contains upperss bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
   //   no_nlic : a scalar of double, related to '_nlc' contains the number of Non-linear In equality constraints in the  Non-linear constraint function('_nlc')
-  //   _nlc : a function, represents Non-linear constraint functions(Both Equality and Inequality) of the problem. It is declared in such a way that non-linear Inequality 
-  //          constraints are defined first, followed by non-linear Equality constraints
+  //   _nlc : a function, represents Non-linear constraint functions(Both Equality and Inequality) of the problem. It is declared in such a way that non-linear 
+  //          Inequality constraints are defined first, followed by non-linear Equality constraints
   //		  Note: Constraints should be declared as a vector form (Refer Example Below)  
   //   options: a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, GradObj, HessObj& GradCon.
   //            Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "GradObj", "ON/OFF", "HessObj", "ON/OFF", "GradCon", "ON/OFF");
@@ -53,7 +55,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   //   _fg : a function, represents gradient function of the Objective in Vector Form
   //   _fh : a function, represents hessian function of the Objective in Symmetric Matrix Form
   //   _cg : a function, represents gradient function of the Non-Linear Constraints in Vector Form
-  //		 Note: Each element of the constraints Gradient's should be declared seperately as one vector (Refer Example Below)  
+  //		 Note: Each element of the constraint's Gradient should be declared seperately as an element of one Vector (Refer Example Below)  
   //   xopt : a vector of doubles, the computed solution of the optimization problem.
   //   fopt : a double, the function value at x
   //   exitflag : Integer identifying the reason the algorithm terminated
@@ -81,32 +83,32 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
   //
   // Examples
-  //      //Find x in R^2 such that it minimizes rosenbrock function 
-  //      //f = 100*(x(2) - x(1)^2)^2 + (1-x(1))^2
-  //
-  //      function y= _f(x)
-  //   	     y= 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  //      endfunction
-  //      function y= _g(x)
-  //   	     y= [-400*(x(2)-x(1)^2)*x(1)-2*(1-x(1)), 200*(x(2)-x(1)^2)]; //Row Vector is expected for gradient function
-  //     endfunction
-  //     function y= _h(x)
-  //   	     y= [1200*x(1)^2, -400*x(1);-400*x(1), 200 ]; //symmentric Matrix is expected for hessian function
-  //     endfunction
-  //     x0=[2,7];
-  //     options=list("MaxIter", [1500], "CpuTime", [500], "Gradient", "ON", "Hessian", "ON");
-  //     [xopt,fopt,exitflag,output,gradient,hessian]=fmincon(_f,x0,options,_g,_h)
-  //
-  //
-  // Examples
   //      //Find x in R^2 such that the below function is minimum
-  //      //f = x(1)^2 + x(2)^2
+  //      //f = x(1)^2 + 2*x(2)
+  //      //Starting Point: [0,0]
+  //	  //Constraint 1, c(1)==>x(1)^2+x(2)^2=1
+  //	  //Constraint's Gradient c'(1)=[2*x(1),2*x(2)]
   //
   //      function y= _f(x)
-  //   	     y= x(1)^2 + x(2)^2;
+  //   	     y= x(1)^2 + 2*x(2);
   //      endfunction
-  //      x0=[2,1];
-  //      [xopt,fopt]=fmincon(_f,x0)
+  //      x0=[0,0];
+  //	  A=[];
+  //	  b=[];
+  //      Aeq=[];
+  //      beq=[];
+  //      lb=[];
+  //      ub=[];
+  //      no_nlic=0;
+  //      function y= _nlc(x)
+  //   	     y= x(1)^2 + x(2)^2 -1;
+  //      endfunction
+  //      options=list(("MaxIter", [1000000], "CpuTime", [60], "GradObj", "OFF", "HessObj", "OFF", "GradCon", "ON");
+  //      function [y]=_cg(x)
+  //	     y(1)=2*x(1);
+  //         y(2)=2*x(2);
+  //      endfunction
+  //      [xopt,fopt]=fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_cg)
   //
   // Authors
   // R.Vidyadhar , Vignesh Kannan
@@ -338,7 +340,6 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    		errmsg = msprintf(gettext("%s: Expected Scalar for no. of non Linear inequality constraints (9th Parameter)"), "fmincon");
    		error(errmsg);
   	end
-  	no_nlc=0;	//Parameter for No. of Non linear Constraints
   	
   	//To check whether the 10th Input argument (_nlc) is a function or an empty Matrix
    	if (size(no_nlic,1)==1 & size(no_nlic,2)==1) then
@@ -359,7 +360,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    			error(errmsg);
    		end
    	else
-		errmsg = msprintf(gettext("%s: Expected scalar or Empty matrix for no. of non linear inequality constraints (9th Parameter) in the Non linear constraint function"), "fmincon");
+		errmsg = msprintf(gettext("%s: Expected scalar or Empty matrix for no. of non linear inequality constraints (9th Parameter)"), "fmincon");
     	error(errmsg); 
    	end
 	
@@ -413,7 +414,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
  
 	//To check the User Entry for Options and storing it
    	for i = 1:(size(param))/2
-       		select param(2*i-1)
+       	select param(2*i-1)
     		case "MaxIter" then
           			options(2*i) = param(2*i);    //Setting the Maximum Iteration as per user entry
        		case "CpuTime" then
@@ -610,7 +611,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 		end
     end
     
-    // Segregating the results as per its Status
+    //In the cases of the problem not being solved return NULL to the output matrices
     if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then
 		xopt=[]
 		fopt=[]
@@ -657,7 +658,12 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
         	printf("\nInvalid status returned. Notify the Toolbox authors\n");
         	break;
         end
-    	
+    
+    //Remark for the user, If the gradient and hessian is send by the User
+    if (no_nlc~=0) then
+		disp("||||||Please Make sure you have entered Correct No. of Non-linear Inequality Constraints (9th Parameter) & Non-linear Constraints Functions (10th Parameter) in proper order -->Scilab Will Calculate Based on your input only||||||");	
+    end
+    
     //Remark for the user, If the gradient and hessian is send by the User
     if (flag1==1 |flag2==1 |flag3==1) then
 		disp("||||||Please Make sure you have entered Correct Functions for Gradient or Hessian -->Scilab Will Calculate Based on your input only||||||");

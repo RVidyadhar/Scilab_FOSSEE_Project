@@ -11,8 +11,8 @@ no_nlic=0;
 lb=[];
 ub=[];
 
-//exec builder.sce
-//exec loader.sce
+exec builder.sce
+exec loader.sce
 function [y]=_nlc(x)
 	y(1)=x(1)^2+x(2)^2-1
 endfunction

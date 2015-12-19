@@ -114,7 +114,7 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
       
    	//To check the User Entry for Options and storing it
    	for i = 1:(size(param))/2
-       		select param(2*i-1)
+       	select param(2*i-1)
     		case "MaxIter" then
           			options(2*i) = param(2*i);
        		case "CpuTime" then
@@ -146,8 +146,8 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    	output = struct("Iterations", []);
    	output.Iterations = iter;
 
-    	//To print Output Message
-    	select status
+    //To print Output Message
+    select status
     
     	case 0 then
         	printf("\nOptimal Solution Found.\n");
