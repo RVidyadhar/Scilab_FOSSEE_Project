@@ -44,8 +44,8 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   //   lb : a vector of doubles, contains lower bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
   //   ub : a vector of doubles, contains upperss bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
   //   no_nlic : a scalar of double, related to '_nlc' contains the number of Non-linear In equality constraints in the  Non-linear constraint function('_nlc')
-  //   _nlc : a function, represents Non-linear constraint functions of the problem. It is declared in such a way that non-linear Inequality constraints are defined first,
-  //          followed by non-linear Equality constraints.
+  //   _nlc : a function, represents Non-linear constraint functions(Both Equality and Inequality) of the problem. It is declared in such a way that non-linear Inequality 
+  //          constraints are defined first, followed by non-linear Equality constraints
   //		  Note: Constraints should be declared as a vector form (Refer Example Below)  
   //   options: a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, GradObj, HessObj& GradCon.
   //            Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "GradObj", "ON/OFF", "HessObj", "ON/OFF", "GradCon", "ON/OFF");
@@ -71,9 +71,9 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   //    &\mbox{min}_{x}
   //    & f(x) \\
   //    & \text{subject to} & A*x \leq b \\
-  //    & \text{subject to} & Aeq*x \leq beq\\
-  //
-  //    & \text{subject to} & conLB \leq C(x) \leq conUB \\
+  //    & & Aeq*x \= beq\\
+  //	& & _nlc(x) \leq / = 0\\
+  //    & & conLB \leq C(x) \leq conUB \\
   //    & & lb \leq x \leq ub \\
   //    \end{eqnarray}
   //   </latex>
@@ -349,6 +349,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    		no_nlc=1;
 	elseif (size(no_nlic,2)==0) then	
 		no_nlic=0;
+		no_nlc=0;
 		if (type(_nlc)~=1) then
 			errmsg = msprintf(gettext("%s: As no. of Non Linear Inequality Constraints (9th Parameter) is empty, non linear constraint function (10th Parameter) should also be empty"), "fmincon");
    			error(errmsg);
@@ -370,6 +371,10 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 		end
    		init1=_nlc(x0);
    		no_nlc=size(init1,1);
+   		if(no_nlc<no_nlic)
+   			errmsg = msprintf(gettext("%s: Error--->Total no. of Non linear Constraints is < than no. of Non linear Inequality Constraints "), "fmincon");
+   			error(errmsg);
+		end
    	end
    	
    	//To check, Whether Options is been entered by user   

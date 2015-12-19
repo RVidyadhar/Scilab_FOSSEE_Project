@@ -11,68 +11,69 @@
 
 
 function [xopt,fopt,exitflag,output] = fminbnd (varargin)
-  	// Solves a minimum of single-variable function on bounded interval
-  	//
-  	//   Calling Sequence
-  	//   xopt = fminunc(_f,x1,x2)
-  	//   xopt = fminunc(_f,x1,x2,options)
-  	//   [xopt,fopt] = fminunc(.....)
-  	//   [xopt,fopt,exitflag]= fminunc(.....)
-  	//   [xopt,fopt,exitflag,output]=fminunc(.....)
-  	//
-  	//
-  	//   Input Parameters:-
-  	//   _f 	: a function, represents objective function of the problem 
-  	//   x1 	: a scalar or vector(1 X 1), contains lower bound
-  	//   x2 	: a scalar or vector(1 X 1), contains upper bound  
-  	//   options	: a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, TolX
-  	//   Default Values for Options==> ("MaxIter", [1000000], "CpuTime", [1000000], TolX, [1e-4]);
-  	// 
-  	//   Output Parameters:-
-  	//   xopt     : a vector of doubles, the computed solution of the optimization problem.
-  	//   fopt     : a double, the function value at x.
-  	//   exitflag : Integer identifying the reason the algorithm terminated.
-  	//   output   : Structure containing information about the optimization.
-  	//
-  	//
-  	//   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
-  	//   It searches the minimum of a unconstrained optimization problem. Find the below examples for reference:
-  	//
-  	//   Example-1:
-  	//   Find x in R^2 such that the rosenbrock function is minimum
-  	//   f = 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  	//
-  	//   Defining Objective Function:
-  	//      function y= _f(x)
-  	//   	   	y= 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  	//      endfunction
-  	//   Setting Bounds:
-  	//   	    x1=5;
-  	//	    x2=10;
-  	//   Setting Options--.(Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "TolX", [---]);)
-  	//        options=list("MaxIter", [1500], "CpuTime", [500], "TolX", [1e-6]);
-  	//  
-  	//   calling fminunc: 
-  	//        [xopt,fopt,exitflag,output]=fminunc(_f,x0,options)
-  	//
-  	//
-  	//   Example-2:
-  	//   Find x in R^2 such that the below function is minimum
-  	//   f = x(1)^2 + x(2)^2
-  	//
-  	//   Defining Objective Function:
-  	//      function y= _f(x)
-  	//   	   	y= x(1)^2 + x(2)^2;
-  	//      endfunction
-  	//   Setting Bounds:
-  	//   	    x1=-3;
-  	//	    x2=3;
-  	//   Setting Options--.(Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "TolX", [---]);)
-  	//        options=list("MaxIter", [100], "CpuTime", [10], "TolX", [1e-2]);
-  	//  
-  	//   calling fminunc: 
-  	//        [xopt,fopt]=fminunc(_f,x0,options)
-  
+  // Solves a minimum of single-variable function on open bounded interval
+  //
+  //   Calling Sequence
+  //   xopt = fminunc(_f,x1,x2)
+  //   xopt = fminunc(_f,x1,x2,options)
+  //   [xopt,fopt] = fminunc(.....)
+  //   [xopt,fopt,exitflag]= fminunc(.....)
+  //   [xopt,fopt,exitflag,output]=fminunc(.....)
+  //
+  //
+  //   Parameters
+  //   _f : a function, represents objective function of the problem 
+  //   x1 : a scalar or vector(1 X 1), contains lower bound
+  //   x2 : a scalar or vector(1 X 1), contains upper bound  
+  //   options : a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, TolX
+  //			 Syntax for option- options= list("MaxIter", [---], "CpuTime", [---],TolX, [---]);
+  //   		     Default Values for Options==> ("MaxIter", [1000000], "CpuTime", [1000000], TolX, [1e-4]);
+  //   xopt : a vector of doubles, the computed solution of the optimization problem.
+  //   fopt : a double, the function value at x.
+  //   exitflag : Integer identifying the reason the algorithm terminated.
+  //   output   : Structure containing information about the optimization.
+  //
+  //   Description
+  //   Search the minimum of a single-variable function on open bounded interval specified by :
+  //   find the minimum of f(x) such that 
+  //
+  //   <latex>
+  //    \begin{eqnarray}
+  //    &\mbox{min}_{x}
+  //    & f(x)\\
+  //    & \text{subject to} & x1 \< x \< x2 \\
+  //    \end{eqnarray}
+  //   </latex>
+  //
+  //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
+  //
+  // Examples
+  //      //Find x in R^2 such that the rosenbrock function is minimum
+  //      //f = 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
+  //
+  //      function y= _f(x)
+  //   	   	y= 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
+  //      endfunction
+  //   	  x1=5;
+  //	  x2=10;
+  //      options=list("MaxIter", [1500], "CpuTime", [500], "TolX", [1e-6]);
+  //      [xopt,fopt,exitflag,output]=fminunc(_f,x0,options)
+  //
+  //
+  // Examples
+  //      //Find x in R^2 such that the below function is minimum
+  //      //f = x(1)^2 + x(2)^2
+  //
+  //      function y= _f(x)
+  //   	   	y= x(1)^2 + x(2)^2;
+  //      endfunction
+  //   	  x1=-3;
+  //	  x2=3;
+  //      options=list("MaxIter", [100], "CpuTime", [10], "TolX", [1e-2]);
+  //      [xopt,fopt]=fminunc(_f,x0,options)
+  //
+  // Authors
+  // R.Vidyadhar , Vignesh Kannan
    	//To check the number of input and output argument
    	[lhs , rhs] = argn();
 	
