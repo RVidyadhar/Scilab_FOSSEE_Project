@@ -2,24 +2,18 @@ function y=_f(x)
 	y=100*(x(2) - x(1)*x(1))*(x(2) - x(1)*x(1)) + (1 - x(1))*(1 - x(1));
 endfunction
 
-x0=[-1,2];
-A=[1,2];
-b=[1];
-Aeq=[];
-beq=[]
-no_nlic=[];
-lb=[];
-ub=[];
+x0 = [0.5,0];
+A = [1,2];
+b = 1;
+Aeq = [2,1];
+beq = 1;
 
-exec builder.sce
-exec loader.sce
-function [y]=_nlc(x)
-	y(1)=(x(1)-1/3)^2 + (x(2)-1/3)^2 - (1/3)^2
-	y(2)=-x(1)^2
-	y(3)=x(2)
-endfunction
 
-options=list("MaxIter", [1500], "CpuTime", [500], "GradObj", "OFF", "HessObj", "OFF","GradCon", "OFF");
+//exec builder.sce
+//exec loader.sce
+
+
+options=list("MaxIter", [1500], "CpuTime", [500], "GradObj", "ON", "HessObj", "ON","GradCon", "OFF");
 function y= _funG(x)
 	y= [-400*x(1)*x(2) + 400*x(1)^3 + 2*x(1)-2, 200*(x(2)-x(1)^2)];
 endfunction
@@ -36,5 +30,5 @@ function [y]= _conG(x)
 	y(5)=0
 	y(6)=1
 endfunction
+x = fmincon(_f,x0,A,b,Aeq,beq,[],[],[],[],options,_funG,_funH)
 
-[x,fval,exitflag,output,lambda,grad,hessian] =fmincon(_f, x0,A,b ,Aeq ,beq,lb,ub, no_nlic,[], options)

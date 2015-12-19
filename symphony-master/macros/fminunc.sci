@@ -12,86 +12,79 @@
 
 
 function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
-  	// Solves a Unconstrainted Optimization Problem
-  	//
-  	//   Calling Sequence
-  	//   xopt = fminunc(_f,x0)
- 	//   xopt = fminunc(_f,x0,options)
-  	//   xopt = fminunc(_f,x0,options,_g)
-  	//   xopt = fminunc(_f,x0,options,_h)
-  	//   xopt = fminunc(_f,x0,options,_g,_h)
-  	//   [xopt,fopt] = fminunc(.....)
-  	//   [xopt,fopt,exitflag]= fminunc(.....)
-  	//   [xopt,fopt,exitflag,output]= fminunc(.....)
-  	//   [xopt,fopt,exitflag,output,gradient]=fminunc(.....)
-  	//   [xopt,fopt,exitflag,output,gradient,hessian]=fminunc(.....)
-  	//
-  	//
-  	//   Input Parameters:-
-  	//   _f 	: a function, represents objective function of the problem 
-  	//   x0 	: a vector of doubles, contains starting of variables.
-  	//   options	: a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, Gradient- ON (or) OFF &  Hessian- ON (or) OFF
-  	//   Default Values for Options==> ("MaxIter", [1000000], "CpuTime", [1000000], "Gradient", "OFF", "Hessian", "OFF");
-  	//   _g 	: a function, represents gradient function of the problem (Vector Form) 
-  	//   _h 	: a function, represents hessian function of the problem  (Symmetric Matrix form)
-  	// 
-  	//   Output Parameters:-
-  	//   xopt     : a vector of doubles, the computed solution of the optimization problem.
-  	//   fopt     : a double, the function value at x.
-  	//   exitflag : Integer identifying the reason the algorithm terminated.
-  	//   output   : Structure containing information about the optimization.
-  	//   gradient : a vector of doubles, contains the gradient of the optimized point.
-  	//   hessian  : a matrix of doubles, contains the hessian of the optimized point.
-  	//
-  	//
-  	//   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
-  	//   It searches the minimum of a unconstrained optimization problem. Find the below examples for reference:
-  	//
-  	//   Example-1:
-  	//   Find x in R^2 such that the rosenbrock function is minimum
-  	//   f = 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  	//
-  	//   Defining Objective Function:
-  	//      function y= _f(x)
-  	//   	   	y= 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  	//      endfunction
-  	//   Defining Gradient Function:	
-  	//      function y= _g(x)
- 	//   	   	y= [-400*(x(2)-x(1)^2)*x(1)-2*(1-x(1)), 200*(x(2)-x(1)^2)]; //Row Vector is expected for gradient function
-  	//      endfunction
-  	//   Defining Hessian Function:
-  	//       function y= _h(x)
-  	//   	   	y= [1200*x(1)^2, -400*x(1);-400*x(1), 200 ]; //symmentric Matrix is expected for hessian function
-  	//       endfunction
-  	//   Setting Initial point:
-  	//   	    x0=[2,7];
-  	//   Setting Options--.(Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "Gradient", "ON/OFF", "Hessian", "ON/OFF");)
-  	//        options=list("MaxIter", [1500], "CpuTime", [500], "Gradient", "ON", "Hessian", "ON");
-  	//  
- 	//   calling fminunc: 
-  	//        [xopt,fopt,exitflag,output,gradient,hessian]=fminunc(_f,x0,options,_g,_h)
-  	//
-  	//
-  	//   Example-2:
-  	//   Find x in R^2 such that the below function is minimum
-  	//   f = x(1)^2 + x(2)^2
-  	//
-  	//   Defining Objective Function:
-  	//      function y= _f(x)
-  	//   	   	y= x(1)^2 + x(2)^2;
-  	//      endfunction
-  	//   Defining Gradient Function:	
-  	//      function y= _g(x)
-  	//   	   	y= [2*x(1), 2*x(2)]; //Row Vector is expected for gradient function
-  	//      endfunction
-  	//   Setting Initial point:
-  	//   	    x0=[2,7];
-  	//   Setting Options--.(Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "Gradient", "ON/OFF", "Hessian", "ON/OFF");)
-  	//        options=list("Gradient", "ON");
-  	//  
-  	//   calling fminunc: 
-  	//        [xopt,fopt]=fminunc(_f,x0,options,_g)
- 
+  // Solves a Unconstrainted Optimization Problem
+  //
+  //   Calling Sequence
+  //   xopt = fminunc(_f,x0)
+  //   xopt = fminunc(_f,x0,options)
+  //   xopt = fminunc(_f,x0,options,_g)
+  //   xopt = fminunc(_f,x0,options,_h)
+  //   xopt = fminunc(_f,x0,options,_g,_h)
+  //   [xopt,fopt] = fminunc(.....)
+  //   [xopt,fopt,exitflag]= fminunc(.....)
+  //   [xopt,fopt,exitflag,output]= fminunc(.....)
+  //   [xopt,fopt,exitflag,output,gradient]=fminunc(.....)
+  //   [xopt,fopt,exitflag,output,gradient,hessian]=fminunc(.....)
+  //
+  //   Parameters
+  //   _f : a function, represents objective function of the problem 
+  //   x0 : a vector of doubles, contains starting of variables.
+  //   options: a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, Gradient&  Hessian
+  //            Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "Gradient", "ON/OFF", "Hessian", "ON/OFF");
+  //   		    Default Values for Options==> ("MaxIter", [1000000], "CpuTime", [60], "Gradient", "OFF", "Hessian", "OFF");
+  //   _g : a function, represents gradient function of the problem in Vector Form 
+  //   _h : a function, represents hessian function of the problem in Symmetric Matrix form
+  //   xopt : a vector of doubles, the computed solution of the optimization problem.
+  //   fopt : a double, the function value at x.
+  //   exitflag : Integer identifying the reason the algorithm terminated.
+  //   output : Structure containing information about the optimization.
+  //   gradient : a vector of doubles, contains the gradient of the optimized point.
+  //   hessian  : a matrix of doubles, contains the hessian of the optimized point.
+  //
+  //   Description
+  //   Search the minimum of a unconstrained optimization problem specified by :
+  //   find the minimum of f(x) such that 
+  //
+  //   <latex>
+  //    \begin{eqnarray}
+  //    &\mbox{min}_{x}
+  //    & f(x)\\
+  //    \end{eqnarray}
+  //   </latex>
+  //
+  //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
+  //
+  // Examples
+  //      //Find x in R^2 such that it minimizes rosenbrock function 
+  //      //f = 100*(x(2) - x(1)^2)^2 + (1-x(1))^2
+  //
+  //      function y= _f(x)
+  //   	     y= 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
+  //      endfunction
+  //      function y= _g(x)
+  //   	     y= [-400*(x(2)-x(1)^2)*x(1)-2*(1-x(1)), 200*(x(2)-x(1)^2)]; //Row Vector is expected for gradient function
+  //     endfunction
+  //     function y= _h(x)
+  //   	     y= [1200*x(1)^2, -400*x(1);-400*x(1), 200 ]; //symmentric Matrix is expected for hessian function
+  //     endfunction
+  //     x0=[2,7];
+  //     options=list("MaxIter", [1500], "CpuTime", [500], "Gradient", "ON", "Hessian", "ON");
+  //     [xopt,fopt,exitflag,output,gradient,hessian]=fminunc(_f,x0,options,_g,_h)
+  //
+  //
+  // Examples
+  //      //Find x in R^2 such that the below function is minimum
+  //      //f = x(1)^2 + x(2)^2
+  //
+  //      function y= _f(x)
+  //   	     y= x(1)^2 + x(2)^2;
+  //      endfunction
+  //      x0=[2,1];
+  //      [xopt,fopt]=fminunc(_f,x0)
+  //
+  // Authors
+  // R.Vidyadhar , Vignesh Kannan
+    
 
 	//To check the number of input and output argument
    	[lhs , rhs] = argn();
