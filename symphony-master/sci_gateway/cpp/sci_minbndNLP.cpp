@@ -48,8 +48,12 @@ bool minbndNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g, Index& nnz_h_
 //get variable and constraint bound info
 bool minbndNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u)
 {	
-	x_l[0]=varLB_[0];
-	x_u[0]=varUB_[0];
+	for(Index i=0;i<n;i++)
+	{
+		x_l[i]=varLB_[i];
+		x_u[i]=varUB_[i];
+	}
+	
 
         g_l=NULL;
         g_u=NULL;

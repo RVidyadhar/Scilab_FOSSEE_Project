@@ -280,14 +280,17 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
    	end
 
     //Calling the Ipopt Function for solving the above Problem
-	[xopt,fopt,status,iter,gradient, hessian1] = solveminuncp(_f,_gradhess,flag1,_g,flag2,_h,x0,options);
+	[xopt,fopt,status,iter,cpu,obj_eval,dual,gradient, hessian1] = solveminuncp(_f,_gradhess,flag1,_g,flag2,_h,x0,options);
    
 	//Calculating the values for output
    	xopt = xopt';
    	exitflag = status;
-   	output = struct("Iterations", []);
+   	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
-
+    output.Cpu_Time = cpu;
+    output.Objective_Evaluation = obj_eval;
+    output.Dual_Infeasibility = dual;
+    
     //Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
     s=size(gradient)
     for i =1:s(2)
@@ -301,7 +304,10 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 	if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then
 		xopt=[]
 		fopt=[]
-		gradient=[]
+		output = struct("Iterations", [],"Cpu_Time",[]);
+		output.Iterations = iter;
+    	output.Cpu_Time = cpu;
+    	gradient=[]
 		hessian=[]
 	end
 		

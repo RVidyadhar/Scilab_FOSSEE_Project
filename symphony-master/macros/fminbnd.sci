@@ -47,30 +47,6 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
   //
   //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
   //
-  // Examples
-  //      //Find x in R^2 such that the rosenbrock function is minimum
-  //      //f = 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  //
-  //      function y= _f(x)
-  //   	   	y= 100*(x(2) - x(1)^2)^2 + (1-x(1))^2;
-  //      endfunction
-  //   	  x1=5;
-  //	  x2=10;
-  //      options=list("MaxIter", [1500], "CpuTime", [500], "TolX", [1e-6]);
-  //      [xopt,fopt,exitflag,output]=fminunc(_f,x0,options)
-  //
-  //
-  // Examples
-  //      //Find x in R^2 such that the below function is minimum
-  //      //f = x(1)^2 + x(2)^2
-  //
-  //      function y= _f(x)
-  //   	   	y= x(1)^2 + x(2)^2;
-  //      endfunction
-  //   	  x1=-3;
-  //	  x2=3;
-  //      options=list("MaxIter", [100], "CpuTime", [10], "TolX", [1e-2]);
-  //      [xopt,fopt]=fminunc(_f,x0,options)
   //
   // Authors
   // R.Vidyadhar , Vignesh Kannan
@@ -87,21 +63,77 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    	_f = varargin(1);
    	x1 = varargin(2);
    	x2 = varargin(3);
-   
-   	s1=size(x1)
-   	s2=size(x2)
 
-   	//To check whether the 2nd and 3rd Input argument(x1,x2) is a column or row vector
-   	if (s1(1)~=1 | s1(2)~=1 | s2(1)~=1 | s2(2)~=1)
-	errmsg = msprintf(gettext("%s: Expected a double value(1x1 double matrix) for x1(Lower bound) and x2(Upper bound) "), "fminbnd");
-    		error(errmsg)
+   	
+   	//To check whether the 2nd Input argument (x1) is a Vector/Scalar
+   	if (type(x1) ~= 1) then
+   		errmsg = msprintf(gettext("%s: Expected Vector/Scalar for Lower Bound Vector (2nd Parameter)"), "fminbnd");
+   		error(errmsg);
+  	end
+  	
+  	//To check for correct size and data of x1 (2nd paramter) and Converting it to Column Vector as required by Ipopt
+   	if (size(x1,2)==0) then
+        x1 = repmat(-%inf,1,s(2));
+    end
+    
+   	if (size(x1,1)~=1) & (size(x1,2)~=1) then
+      errmsg = msprintf(gettext("%s: Lower Bound (2nd Parameter) should be a vector"), "fminbnd");
+      error(errmsg); 
+   	elseif (size(x1,2)==1) then
+   	 	x1=x1;
+   	elseif (size(x1,1)==1) then
+   		x1=x1';
    	end
-   
-   	//To check the difference between Upper and Lower Bound
-   	if (x2-x1<=1e-6) then
-   		errmsg = msprintf(gettext("%s: Difference between Upper Bound and Lower bound should be > 10^6) "), "fminbnd");
+   	s=size(x1)
+   	
+   	//To check whether the 3rd Input argument (x2) is a Vector/Scalar
+   	if (type(x2) ~= 1) then
+   		errmsg = msprintf(gettext("%s: Expected Vector/Scalar for Upper Bound Vector (3rd Parameter)"), "fminbnd");
+   		error(errmsg);
+  	end
+   	
+   	//To check for correct size and data of x2 (3rd paramter) and Converting it to Column Vector as required by Ipopt
+    if (size(x2,2)==0) then
+        x2 = repmat(%inf,1,s(2));
+    end
+    
+    if (size(x2,1)~=1)& (size(x2,2)~=1) then
+      errmsg = msprintf(gettext("%s: Upper Bound (3rd Parameter) should be a vector"), "fminbnd");
+      error(errmsg); 
+    elseif(size(x2,1)~=s(1) & size(x2,2)==1) then
+   		errmsg = msprintf(gettext("%s: Upper Bound and Lower Bound are not matching"), "fminbnd");
+   		error(errmsg);
+   	elseif(size(x2,1)==s(1) & size(x2,2)==1) then
+   	 	x2=x2;
+   	elseif(size(x2,1)==1 & size(x2,2)~=s(1)) then
+   		errmsg = msprintf(gettext("%s: Upper Bound and Lower Bound are not matching"), "fminbnd");
+   		error(errmsg);
+   	elseif(size(x2,1)==1 & size(x2,2)==s(1)) then
+   		x2=x2';
+   	end 
+    
+    //To check the contents of x1 & x2 (2nd & 3rd Parameter)
+    
+    for i = 1:s(2)
+		if (x1(i) == %inf) then
+		   	errmsg = msprintf(gettext("%s: Value of Lower Bound can not be infinity"), "fminbnd");
+    		error(errmsg); 
+  		end	
+		if (x2(i) == -%inf) then
+		   	errmsg = msprintf(gettext("%s: Value of Upper Bound can not be negative infinity"), "fminbnd");
+    		error(errmsg); 
+		end	
+		if(x2(i)-x1(i)<=1e-6) then
+			errmsg = msprintf(gettext("%s: Difference between Upper Bound and Lower bound should be atleast > 10^6 for variable No.= %d "), "fminbnd", i);
     		error(errmsg)
-   	end
+    	end
+	end
+	
+	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
+   	if(execstr('init=_f(x1)','errcatch')==21) then
+		errmsg = msprintf(gettext("%s: Objective function and bounds didnot match"), "fmincon");
+   		error(errmsg);
+	end
 
    	//To check, Whether Options is been entered by user  
    	if ( rhs<4 | size(varargin(4)) ==0 ) then
@@ -138,14 +170,26 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    	endfunction
    
    	//Calling sci_solveminuncp by sending the inputted paramters 
-   	[xopt,fopt,status,iter] = solveminbndp(_f,_gradhess,x1,x2,options);
+   	[xopt,fopt,status,iter,cpu,obj_eval,dual] = solveminbndp(_f,_gradhess,x1,x2,options);
    
    	//Calculating the values for output
    	xopt = xopt';
    	exitflag = status;
-   	output = struct("Iterations", []);
+   	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
+    output.Cpu_Time = cpu;
+    output.Objective_Evaluation = obj_eval;
+    output.Dual_Infeasibility = dual;
 
+	//In the cases of the problem not being solved return NULL to the output matrices
+	if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then
+		xopt=[]
+		fopt=[]
+		output = struct("Iterations", [],"Cpu_Time",[]);
+		output.Iterations = iter;
+    	output.Cpu_Time = cpu;
+	end
+	
     //To print Output Message
     select status
     

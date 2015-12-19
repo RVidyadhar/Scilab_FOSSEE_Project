@@ -13,6 +13,7 @@
 #include "sci_iofunc.hpp"
 #include "IpIpoptApplication.hpp"
 #include "minbndNLP.hpp"
+#include <IpSolveStatistics.hpp>
 
 extern "C"
 {
@@ -30,7 +31,7 @@ int sci_solveminbndp(char *fname)
 	using namespace Ipopt;
 
 	CheckInputArgument(pvApiCtx, 5, 5); 
-	CheckOutputArgument(pvApiCtx, 4, 4);
+	CheckOutputArgument(pvApiCtx, 7, 7);
 	
 	// Error management variable
 	SciErr sciErr;
@@ -48,8 +49,10 @@ int sci_solveminbndp(char *fname)
 	int x1_rows, x1_cols, x2_rows, x2_cols;
 	
 	// Output arguments
-	double *fX = NULL, ObjVal=0,iteration=0;
+	double *fX = NULL, ObjVal=0,iteration=0,cpuTime=0,fobj_eval=0;
+	double dual_inf, constr_viol, complementarity, kkt_error;
 	int rstatus = 0;
+	int int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval;
 
 	////////// Manage the input argument //////////
 	
@@ -77,8 +80,8 @@ int sci_solveminbndp(char *fname)
 		return 1;
 	}
 
-        //Getting number of iterations
-        if(getFixedSizeDoubleMatrixInList(5,2,temp1,temp2,&max_iter))
+    //Getting number of iterations
+    if(getFixedSizeDoubleMatrixInList(5,2,temp1,temp2,&max_iter))
 	{
 		return 1;
 	}
@@ -97,7 +100,7 @@ int sci_solveminbndp(char *fname)
  
 
         //Initialization of parameters
-	nVars=1;
+	nVars=x1_rows;
 	nCons=0;
         
         // Starting Ipopt
@@ -123,14 +126,19 @@ int sci_solveminbndp(char *fname)
 	 // Ask Ipopt to solve the problem
 	
 	 status = app->OptimizeTNLP(Prob);
+	 
+	 cpuTime = app->Statistics()->TotalCPUTime();
+
+	 app->Statistics()->NumberOfEvaluations(int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval);
+	 
+	 app->Statistics()->Infeasibilities(dual_inf, constr_viol, complementarity, kkt_error);
 
 	 rstatus = Prob->returnStatus();
          
 
 	////////// Manage the output argument //////////
 
-	if (rstatus == 0 | rstatus == 1 | rstatus == 2)
-	{
+
 		fX = Prob->getX();
 		ObjVal = Prob->getObjVal();
 		iteration = Prob->iterCount();
@@ -154,30 +162,22 @@ int sci_solveminbndp(char *fname)
 		{
 			return 1;
 		}
-	}
-
-	else
-	{
-		if (returnDoubleMatrixToScilab(1, 0, 0, fX))
+		
+		if (returnDoubleMatrixToScilab(5, 1, 1, &cpuTime))
+		{
+			return 1;
+		}
+	
+		if (returnDoubleMatrixToScilab(6, 1, 1, &fobj_eval))
+		{
+			return 1;
+		}
+	
+		if (returnDoubleMatrixToScilab(7, 1, 1, &dual_inf))
 		{
 			return 1;
 		}
 
-		if (returnDoubleMatrixToScilab(2, 1, 1, &ObjVal))
-		{
-			return 1;
-		}
-
-		if (returnIntegerMatrixToScilab(3, 1, 1, &rstatus))
-		{
-			return 1;
-		}
-
-		if (returnDoubleMatrixToScilab(4, 1, 1, &iteration))
-		{
-			return 1;
-		}
-	}
 
 	return 0;
 }

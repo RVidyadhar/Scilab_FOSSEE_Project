@@ -19,5 +19,5 @@ function y= _h(x)
 endfunction
 
 
-[xopt,fopt,status,iter,gradient, hessian1] = fminunc(_f,x0,options)
+[xopt,fopt,exitflag,status] = fminbnd(_f,[0,0],[1,1])
 

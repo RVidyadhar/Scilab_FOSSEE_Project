@@ -595,13 +595,16 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    	end
    	
    	//Calling the Ipopt Function for solving the above Problem
-    [xopt,fopt,status,iter,lambda,gradient,hessian1] = solveminconp (_f,_gradhess,A,b,Aeq,beq,lb,ub,no_nlc,no_nlic,_nlc,flag1,_fg,flag2,_fh,flag3,_cg,x0,options)		
+    [xopt,fopt,status,iter,cpu,obj_eval,dual,lambda,gradient,hessian1] = solveminconp (_f,_gradhess,A,b,Aeq,beq,lb,ub,no_nlc,no_nlic,_nlc,flag1,_fg,flag2,_fh,flag3,_cg,x0,options)		
    
 	//Calculating the values for output   	
    	xopt = xopt';
     exitflag = status;
-    output = struct("Iterations", []);
-    output.Iterations = iter;
+    output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
+   	output.Iterations = iter;
+    output.Cpu_Time = cpu;
+    output.Objective_Evaluation = obj_eval;
+    output.Dual_Infeasibility = dual;
 
     //Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
     s=size(gradient)
@@ -615,6 +618,9 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
     if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then
 		xopt=[]
 		fopt=[]
+		output = struct("Iterations", [],"Cpu_Time",[]);
+		output.Iterations = iter;
+    	output.Cpu_Time = cpu;
 		lambda=[]
 		gradient=[]
 		hessian=[]

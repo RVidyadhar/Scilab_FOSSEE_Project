@@ -13,6 +13,7 @@
 #include "sci_iofunc.hpp"
 #include "IpIpoptApplication.hpp"
 #include "minuncNLP.hpp"
+#include <IpSolveStatistics.hpp>
 
 extern "C"
 {
@@ -30,7 +31,7 @@ int sci_solveminuncp(char *fname)
 	using namespace Ipopt;
 
 	CheckInputArgument(pvApiCtx, 8, 8);
-	CheckOutputArgument(pvApiCtx, 6, 6);
+	CheckOutputArgument(pvApiCtx, 9, 9);
 	
 	// Error management variable
 	SciErr sciErr;
@@ -49,10 +50,12 @@ int sci_solveminuncp(char *fname)
 	int x0_rows, x0_cols;
 	
 	// Output arguments
-	double *fX = NULL, ObjVal=0,iteration=0;
+	double *fX = NULL, ObjVal=0,iteration=0,cpuTime=0,fobj_eval=0;
+	double dual_inf, constr_viol, complementarity, kkt_error;
 	double *fGrad=  NULL;
 	double *fHess=  NULL;
 	int rstatus = 0;
+	int int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval;
 
 	////////// Manage the input argument //////////
 	
@@ -126,9 +129,14 @@ int sci_solveminuncp(char *fname)
 	 // Ask Ipopt to solve the problem
 	
 	 status = app->OptimizeTNLP(Prob);
+	 
+	 cpuTime = app->Statistics()->TotalCPUTime();
 
+	 app->Statistics()->NumberOfEvaluations(int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval);
+	 
+	 app->Statistics()->Infeasibilities(dual_inf, constr_viol, complementarity, kkt_error);
+	 
 	 rstatus = Prob->returnStatus();
-         
 
 	////////// Manage the output argument //////////
 
@@ -137,6 +145,8 @@ int sci_solveminuncp(char *fname)
 	fHess = Prob->getHess();
 	ObjVal = Prob->getObjVal();
 	iteration = Prob->iterCount();
+	fobj_eval  = (double)int_fobj_eval;
+	
 	if (returnDoubleMatrixToScilab(1, 1, nVars, fX))
 	{
 		return 1;
@@ -156,13 +166,28 @@ int sci_solveminuncp(char *fname)
 	{
 		return 1;
 	}
+	
+	if (returnDoubleMatrixToScilab(5, 1, 1, &cpuTime))
+	{
+		return 1;
+	}
+	
+	if (returnDoubleMatrixToScilab(6, 1, 1, &fobj_eval))
+	{
+		return 1;
+	}
+	
+	if (returnDoubleMatrixToScilab(7, 1, 1, &dual_inf))
+	{
+		return 1;
+	}
 		
-	if (returnDoubleMatrixToScilab(5, 1, nVars, fGrad))
+	if (returnDoubleMatrixToScilab(8, 1, nVars, fGrad))
 	{
 		return 1;
 	}
 
-	if (returnDoubleMatrixToScilab(6, 1, nVars*nVars, fHess))
+	if (returnDoubleMatrixToScilab(9, 1, nVars*nVars, fHess))
 	{
 		return 1;
 	}
