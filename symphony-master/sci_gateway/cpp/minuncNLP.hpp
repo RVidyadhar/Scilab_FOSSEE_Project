@@ -24,27 +24,23 @@ class minuncNLP : public TNLP
 
   	Index numConstr_;                //Number of constraints 
 
-	Number flag_;                     //Used for considering different cases of options specified by the user
+	Number flag1_;                   //Used for Gradient On/OFF
+	
+	Number flag2_;                   //Used for Hessian ON/OFF
+ 
+  	const Number *varGuess_= NULL;	 //varGuess_ is a pointer to a matrix of size of 1*numVars_ with initial guess of all variables.
 
-  	const Number *varGuess_= NULL;	 //varGuess_ is a pointer to a matrix of size of 1*numVars_
-				         //with initial guess of all variables.
+  	Number *finalX_= NULL;           //finalX_ is a pointer to a matrix of size of 1*numVars_ with final value for the primal variables.
 
-  	Number *finalX_= NULL;           //finalX_ is a pointer to a matrix of size of 1*numVars_
-				         //with final value for the primal variables.
+  	Number *finalGradient_=NULL;     //finalGradient_ is a pointer to a matrix of size of numVars_*numVars_ with final value of gradient for the primal variables.
 
-  	Number *finalGradient_=NULL;     //finalGradient_ is a pointer to a matrix of size of numVars_*numVars_
-				         //with final value of gradient for the primal variables.
-
-
-  	Number *finalHessian_=NULL;      //finalHessian_ is a pointer to a matrix of size of 1*numVar_
-				         //with final value of hessian for the primal variables.
-
+  	Number *finalHessian_=NULL;      //finalHessian_ is a pointer to a matrix of size of 1*numVar_ with final value of hessian for the primal variables.
 
   	Number finalObjVal_;          	 //finalObjVal_ is a scalar with the final value of the objective.
 
-  	int iter_;			 //Number of iteration.
+  	int iter_;			 			//Number of iteration.
 
-  	int status_;			 //Solver return status
+  	int status_;			 		//Solver return status
 
 
   	minuncNLP(const minuncNLP&);
@@ -53,7 +49,7 @@ class minuncNLP : public TNLP
 	public:
 
   	/** user defined constructor */
-  	minuncNLP(Index nV, Index nC,Number *x0,Number f):numVars_(nV),numConstr_(nC),varGuess_(x0),flag_(f),finalX_(0),finalGradient_(0),finalHessian_(0),finalObjVal_(1e20){	}
+  	minuncNLP(Index nV, Index nC,Number *x0,Number f1, Number f2):numVars_(nV),numConstr_(nC),varGuess_(x0),flag1_(f1),flag2_(f2),finalX_(0),finalGradient_(0),finalHessian_(0),finalObjVal_(1e20){	}
 
   	/** default destructor */
   	virtual ~minuncNLP();

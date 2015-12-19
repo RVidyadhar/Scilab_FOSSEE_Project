@@ -29,7 +29,7 @@ int sci_solveminuncp(char *fname)
 {
 	using namespace Ipopt;
 
-	CheckInputArgument(pvApiCtx, 5, 7);
+	CheckInputArgument(pvApiCtx, 8, 8);
 	CheckOutputArgument(pvApiCtx, 6, 6);
 	
 	// Error management variable
@@ -39,7 +39,7 @@ int sci_solveminuncp(char *fname)
 	int* funptr=NULL;
 	int* gradhesptr=NULL;
 	double* x0ptr=NULL;
-	double flag;
+	double flag1,flag2;
         
 
         // Input arguments
@@ -67,38 +67,45 @@ int sci_solveminuncp(char *fname)
 	{
 		return 1;
 	}
-
-	//x0(starting point) matrix from scilab
-	if(getDoubleMatrixFromScilab(3, &x0_rows, &x0_cols, &x0ptr))
+	
+	//Flag for Gradient from Scilab
+	if(getDoubleFromScilab(3, &flag1))
+	{
+		return 1;
+	}
+	
+	//Flag for Hessian from Scilab
+	if(getDoubleFromScilab(5, &flag2))
 	{
 		return 1;
 	}
 
-       
-        //Getting number of iterations
-        if(getFixedSizeDoubleMatrixInList(4,2,temp1,temp2,&max_iter))
+	//x0(starting point) matrix from scilab
+	if(getDoubleMatrixFromScilab(7, &x0_rows, &x0_cols, &x0ptr))
+	{
+		return 1;
+	}
+
+    //Getting number of iterations
+    if(getFixedSizeDoubleMatrixInList(8,2,temp1,temp2,&max_iter))
 	{
 		return 1;
 	}
 
 	//Getting Cpu Time
-	if(getFixedSizeDoubleMatrixInList(4,4,temp1,temp2,&cpu_time))
+	if(getFixedSizeDoubleMatrixInList(8,4,temp1,temp2,&cpu_time))
 	{
 		return 1;
-	}
+	}	
+	
 
-	if(getDoubleFromScilab(5, &flag))
-	{
-		return 1;
-	}
-
-        //Initialization of parameters
+    //Initialization of parameters
 	nVars=x0_cols;
 	nCons=0;
         
-        // Starting Ipopt
+    // Starting Ipopt
 
-	SmartPtr<minuncNLP> Prob = new minuncNLP(nVars, nCons, x0ptr, flag);
+	SmartPtr<minuncNLP> Prob = new minuncNLP(nVars, nCons, x0ptr, flag1, flag2);
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 	app->RethrowNonIpoptException(true);
 

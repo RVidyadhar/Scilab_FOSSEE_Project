@@ -125,8 +125,11 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
    	end
    
 
-	//Returns "Invalid Index" Error if size of x0 is not matched with _f
-   	init=_f(x0);
+  	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
+   	if(execstr('init=_f(x0)','errcatch')==21) then
+		errmsg = msprintf(gettext("%s: Objective function and x0 didnot match"), "fmincon");
+   		error(errmsg);
+	end
    
 	//To check, Whether Options is been entered by user   
    	if ( rhs<3  ) then
@@ -151,13 +154,14 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 	//To set Default Value for Options, If User Doesn't enter Options
    	options = list(..
       		"MaxIter"     , [1000000], ...
-      		"CpuTime"   , [1000000] ...
+      		"CpuTime"   , [60] ...
       		);
 
 	//Flags to check whether Gradient is "ON"/"OFF" & Hessian is "ON"/"OFF" 
-   	flag_g=0;
-   	flag_h=0;
-   	flag=0;
+   	flag1=0;
+   	flag2=0;
+   	_g=[]
+   	_h=[]
  
 	//To check the User Entry for Options and storing it
    	for i = 1:(size(param))/2
@@ -169,14 +173,15 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
         	case "Gradient" then
         			if (param(2*i)=="ON") then
         				//To check whether the user has provided Gradient function if Gradient Option is "ON"
-        				if (rhs<=3) then      
+        				if (rhs<4) then      
 				     		errmsg = msprintf(gettext("%s: Gradient function is missing"), "fminunc");
 				    		error(errmsg);     			
         				end
         				//This flag is activated(ie. =1) if Gradient is supplied
-        				flag_g=1;
-        				      
-        				//To check whether Wrong entry(other than ON/OFF) is entered
+        				flag1=1;
+        				pos_g=4;
+        				_g=varargin(4);        				      
+        			//To check whether Wrong entry(other than ON/OFF) is entered
         			elseif (param(2*i)~="ON" & param(2*i)~="OFF") then    
         				errmsg = msprintf(gettext("%s: Options for Gradient should be either ON or OFF"), "fminunc");
 					error(errmsg);     	
@@ -184,13 +189,25 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
         	case "Hessian" then
         			if (param(2*i)=="ON") then
         				//To check whether the user has provided Hessian function if Hessian Option is "ON"
-					if (rhs<=3) then    
-				     		errmsg = msprintf(gettext("%s: Hessian function is missing"), "fminunc");
-				     		error(errmsg);     			
+						if (flag1==0) then
+							if (rhs<4) then    
+				     			errmsg = msprintf(gettext("%s: Hessian function is missing"), "fminunc");
+				     			error(errmsg);     			
+        					end
+        					//This flag is activated(ie. =1) if Hessian is supplied
+        					flag2=1;
+        			        pos_h=4;
+        					_h=varargin(4);
+        				elseif (flag1==1) then
+							if (rhs<5) then    
+				     			errmsg = msprintf(gettext("%s: Hessian function is missing"), "fminunc");
+				     			error(errmsg);     			
+        					end
+        					//This flag is activated(ie. =1) if Hessian is supplied
+        					flag2=1;
+        			        pos_h=5;
+        					_h=varargin(5);
         				end
-        				//This flag is activated(ie. =1) if Hessian is supplied
-        				flag_h=1;
-        			            
         			//To check whether Wrong entry(other than ON/OFF) is entered	            
         			elseif (param(2*i)~="ON" & param(2*i)~="OFF") then    
         				errmsg = msprintf(gettext("%s: Options for Hessian should be either ON or OFF"), "fminunc");
@@ -210,128 +227,60 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 		else		//To return Hessiam]n
 			[grad,y]=numderivative(_f,x)
 		end
-   	endfunction 
-   
-     
-	//Calling Ipopt depending upon the user's Entry
-   	if (flag_g==0 & flag_h==0) then	//If both the Gradient and Hessian are "OFF"
+   	endfunction
+   	
+   	//To check the correct no. of inputs given by the user
+   	if (flag1==0 & flag2==0)
+   		if(rhs>3) then
+        	errmsg = msprintf(gettext("%s: Only 3 Inputs are Needed for this option(GradObj=OFF, HessObj=OFF), but %d were recorded"), "fmincon",rhs);
+			error(errmsg); 
+		end
+   elseif ((flag1==1 & flag2==0) | (flag1==0 & flag2==1)) then
+  		if(rhs>12) then
+        	errmsg = msprintf(gettext("%s: Only 4 Inputs were needed for this option, but %d were recorded"), "fmincon",rhs);
+			error(errmsg);
+		end
+   elseif (flag1==1 & flag2==1)
+   		if(rhs>14) then
+        	errmsg = msprintf(gettext("%s: Only 5 Inputs are Needed for this option(GradObj=ON, HessObj=ON), but %d were recorded"), "fmincon",rhs);
+			error(errmsg); 
+		end
+	end
 	
-		// Checking for unwanted Parameters if any 
-		if (rhs>3) then 
-			errmsg = msprintf(gettext("%s: Only 3 Input Parameters are required for this option (Gradient=OFF, Hessian=OFF)"), "fminunc");
-			error(errmsg);     			
-        	end
-        
-        	//Setting flag=1 for this case
-		flag=1;				
-		//Calling sci_solveminuncp by sending the inputted paramters 
-		[xopt,fopt,status,iter,gradient, hessian1] = solveminuncp(_f,_gradhess,x0,options,flag);
-	
-   	elseif (flag_g==1 & flag_h==0) then  //If the Gradient is "ON" and Hessian is "OFF"
-   		//Storing the 4th Input Parameter
-   		_g=varargin(4)			
-   	
-   		// Checking for unwanted Parameters if any 
-   		if (rhs>4) then 
-			errmsg = msprintf(gettext("%s: Only 4 Input Parameters are required for this option (Hessian=OFF)"), "fminunc");
-			error(errmsg);     			
-        	end
-        
-   		//To check whether the 4th Input argument(_g) is function or not
+  //To check the correct input of Gradient and Hessian Functions from Users	     	
+   if (flag1==1) then
    		if (type(_g) ~= 13 & type(_g) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Gradient"), "fminunc");
+  			errmsg = msprintf(gettext("%s: Expected function for Gradient of Objective, since GradObj=ON"), "fmincon");
    			error(errmsg);
    		end
-   	
-   		//To check whether the _g function is row vector function of size (1 X size(x0,2))
-   		sample_g=_g(x0)
-   		if(size(sample_g,1)~=1 | size(sample_g,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Gradient function(Row Vector function is Expected) (or) x0 is wrongly entered"), "fminunc");
+   		if(execstr('sample_g=_g(x0)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 didnot match "), "fmincon", rhs);
+   			error(errmsg);
+		end
+		sample_g=_g(x0);
+		if (size(sample_g,1)~=1 | size(sample_g,2)~=s(2)) then
+   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Gradient function(%dth Parameter)---->Row Vector function is Expected"), "fmincon",pos_g);
    			error(errmsg);
    		end
-   	
-   		//Setting flag=2 for this case
-   		flag=2;				  
-   		//Calling sci_solveminuncp by sending the inputted paramters 
-   		[xopt,fopt,status,iter,gradient, hessian1] = solveminuncp(_f,_gradhess,x0,options,flag,_g);
-   	
-   	elseif (flag_g==0 & flag_h==1) then   //If the Gradient is "OFF" and Hessian is "ON"
-  		//Storing the 4th Input Parameter
-  		_h=varargin(4)
-  				 
-  		// Checking for unwanted Parameters if any 
-  		if (rhs>4) then 
-			errmsg = msprintf(gettext("%s: Only 4 Input Parameters are required for this option (Gradient=OFF)"), "fminunc");
-			error(errmsg);     			
-        	end
-        
-        	//To check whether the 4th Input argument(_h) is function or not
-  		if (type(_h) ~= 13 & type(_h) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Hessian "), "fminunc");
-   			error(errmsg);
-   		end
-   	
-   		//To check whether the _h function is symmetric matrix function of size (numberOfVariables X numberOfVariables)
-   		sample_h=_h(x0)
-   		if(size(sample_h,1)~=s(2) | size(sample_h,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Hessian function(Symmentric Matrix function is Expected) (or) x0 is wrongly entered"), "fminunc");
-   			error(errmsg);
-   		end
-   	
-   		//Setting flag=3 for this case
-  		flag=3;				
-  		//Calling sci_solveminuncp by sending the inputted paramters 
-  		[xopt,fopt,status,iter,gradient, hessian1] = solveminuncp(_f,gradhess,x0,options,flag,_h);
-  	
-   	elseif (flag_g==1 & flag_h==1) then   //If both the Gradient and Hessian are "ON"
-  		//Storing the 4th Input Parameter
-  		_g=varargin(4)
-       	 
-        	//To check whether the 4th Input argument(_g) is function or not
-   		if (type(_g) ~= 13 & type(_g) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Gradient"), "fminunc");
-   			error(errmsg);
-   		end
-        
-        	//To check whether the _g function is row vector function of size (1 X numberOfVariables)
-        	sample_g=_g(x0)
-   		if(size(sample_g,1)~=1 | size(sample_g,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Gradient function(Row Vector function is Expected) (or) x0 is wrongly entered"), "fminunc");
-   			error(errmsg);
-   		end
-   	
-   		// Checking for unwanted Parameters if any 
-  		if (rhs~=5) then
-			errmsg = msprintf(gettext("%s: Hessian function is missing"), "fminunc");
-			error(errmsg);     			
-        	end
-   	
-   		//Storing the 5th Input Parameter
-  		_h=varargin(5)
-  	
-  		//To check whether the 4th Input argument(_h) is function or not
-  		if (type(_h) ~= 13 & type(_h) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Objective "), "fminunc");
-   			error(errmsg);
-   		end
-   		if (type(_h) ~= 13 & type(_h) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Objective "), "fminunc");
-   			error(errmsg);
-   		end
-   	
-   		//To check whether the _h function is symmetric matrix function of size (numberOfVariables X numberOfVariables)
-   		sample_h=_h(x0)
-   		if(size(sample_h,1)~=s(2) | size(sample_h,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Hessian function(Symmentric Matrix function is Expected) (or) x0 is wrongly entered"), "fminunc");
-   			error(errmsg);
-   		end
-   	
-   		//Setting flag=4 for this case
-  		flag=4;				
-  		//Calling sci_solveminuncp by sending the inputted paramters 
-  		[xopt,fopt,status,iter,gradient, hessian1] = solveminuncp(_f,_gradhess,x0,options,flag,_g,_h);
    	end
-   
+   	if (flag2==1) then
+   		if (type(_h) ~= 13 & type(_h) ~= 11) then
+  			errmsg = msprintf(gettext("%s: Expected function for Hessian of Objective, since HessObj=ON"), "fmincon");
+   			error(errmsg);
+   		end
+   		if(execstr('sample_h=_h(x0)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 didnot match "), "fmincon", rhs);
+   			error(errmsg);
+		end
+		sample_h=_h(x0);
+   		if(size(sample_h,1)~=s(2) | size(sample_h,2)~=s(2)) then
+   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Hessian function(%dth Parameter)---->Symmetric Matrix function is Expected "), "fmincon",pos_h);
+   			error(errmsg);
+   		end
+   	end
+
+    //Calling the Ipopt Function for solving the above Problem
+	[xopt,fopt,status,iter,gradient, hessian1] = solveminuncp(_f,_gradhess,flag1,_g,flag2,_h,x0,options);
    
 	//Calculating the values for output
    	xopt = xopt';
@@ -395,8 +344,8 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
         	break;
     	end
     	
-    	//Remark for the user, If the gradient and hessian is send by the User
-    if (flag==2 |flag==3 |flag==4) then
+    //Remark for the user, If the gradient and hessian is send by the User
+    if (flag1==1 |flag2==1) then
 		disp("||||||Please Make sure you have entered Correct Functions for Gradient or Hessian -->Scilab Will Calculate Based on your input only||||||");
     end	
 endfunction
