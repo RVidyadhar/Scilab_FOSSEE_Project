@@ -80,8 +80,8 @@ int sci_solveminbndp(char *fname)
 		return 1;
 	}
 
-    //Getting number of iterations
-    if(getFixedSizeDoubleMatrixInList(5,2,temp1,temp2,&max_iter))
+    	//Getting number of iterations
+    	if(getFixedSizeDoubleMatrixInList(5,2,temp1,temp2,&max_iter))
 	{
 		return 1;
 	}
@@ -124,17 +124,13 @@ int sci_solveminbndp(char *fname)
    	 return (int) status;
  	 }
 	 // Ask Ipopt to solve the problem
-	
 	 status = app->OptimizeTNLP(Prob);
 	 
+	 //Get the solve statistics
 	 cpuTime = app->Statistics()->TotalCPUTime();
-
 	 app->Statistics()->NumberOfEvaluations(int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval);
-	 
 	 app->Statistics()->Infeasibilities(dual_inf, constr_viol, complementarity, kkt_error);
-
 	 rstatus = Prob->returnStatus();
-         
 
 	////////// Manage the output argument //////////
 
@@ -142,6 +138,7 @@ int sci_solveminbndp(char *fname)
 		fX = Prob->getX();
 		ObjVal = Prob->getObjVal();
 		iteration = Prob->iterCount();
+		fobj_eval=(double)int_fobj_eval;
 
 		if (returnDoubleMatrixToScilab(1, 1, nVars, fX))
 		{

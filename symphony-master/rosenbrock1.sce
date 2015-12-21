@@ -60,4 +60,4 @@ function y= _conH(x)
 	y(2)=[-2,0;0,0]
 endfunction
 //[x,fval,exitflag,output,lambda,grad,hessian] =fmincon(_f, x0,[],[] ,Aeq ,beq,[],[], no_nlic, _nlc, options, _funG, _funH);
-[x,fval,exitflag,output,lambda,grad,hessian] =fmincon(_f, x0,[] ,[]);
+[x,fval,exitflag,output,lambda,grad,hessian] =fmincon(_f, x0,[] ,[])

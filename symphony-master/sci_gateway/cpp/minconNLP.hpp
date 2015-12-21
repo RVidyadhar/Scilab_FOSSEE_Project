@@ -24,39 +24,39 @@ class minconNLP : public TNLP
 
   	Index numConstr_;                //Number of constraints 
 
-	Number flag1_;                   //Used for considering different cases of options specified by the user
+	Number flag1_;                   //Gradient of objective ON or OFF
 
-        Number flag2_;
+        Number flag2_;			 //Hessian of objective ON or OFF
 
-	Number flag3_;
+	Number flag3_;                   //Jacobian of constraints ON or OFF
 
-	Number nonlinCon_;
+	Number nonlinCon_;               //Number of non-linear constraints
 
-	Number nonlinIneqCon_;
+	Number nonlinIneqCon_;		 //Number of non-linear inequality constraints
 
-	const Number *A_= NULL;
+	const Number *A_= NULL;		 //Matrix for linear inequality constraints
 
-	const Number *b_= NULL;
+	const Number *b_= NULL;		 //Matrix for bounds of linear inequality constraints
 
-	const Number *Aeq_= NULL;
+	const Number *Aeq_= NULL;	 //Matrix for linear equality constraints
 
-	const Number *beq_= NULL;
+	const Number *beq_= NULL;        //Matrix for bounds of linear equality constraints
 
-	Index Arows_;
+	Index Arows_;			 //Number of rows of linear inequality constraints
 
-	Index Acols_;
+	Index Acols_;			 //Number of columns of linear inequality constraints
 
-	Index brows_;
+	Index brows_;			 //Number of rows of bounds of linear inequality constraints
 
-	Index bcols_;
+	Index bcols_;			 //Number of columns of bounds of linear inequality constraints
 
-	Index Aeqrows_;
+	Index Aeqrows_;			 //Number of rows of linear equality constraints
 
-	Index Aeqcols_;
+	Index Aeqcols_;			 //Number of columns of linear equality constraints
 
-	Index beqrows_;
+	Index beqrows_;			 //Number of rows of bounds of linear equality constraints
 
-	Index beqcols_;
+	Index beqcols_;			 //Number of columns of bounds of linear equality constraints
 	
 
   	const Number *varGuess_= NULL;	 //varGuess_ is a pointer to a matrix of size of 1*numVars_
@@ -153,21 +153,21 @@ class minconNLP : public TNLP
   	const double * getHess();       //Returns a pointer to a matrix of size of numVars_*numVars_ 
 					//with final value of hessian for the primal variables.
 	
-	const double * getZl();
+	const double * getZl();		//Returns a pointer to a matrix of size of 1*numVars_
+					// with final values for the lower bound multipliers
 
-	
-	const double * getZu();
+	const double * getZu();		//Returns a pointer to a matrix of size of 1*numVars_
+					//with final values for the upper bound multipliers
 
+	const double * getLambda();	//Returns a pointer to a matrix of size of 1*numConstr_
+					//with final values for the constraint multipliers
 
-	const double * getLambda();
-
-  	double getObjVal();		//Returns the output of the final value of the objective.
+	double getObjVal();		//Returns the output of the final value of the objective.
 
   	double iterCount();		//Returns the iteration count
 
   	int returnStatus();		//Returns the status count
 
 };
-
 
 #endif

@@ -123,7 +123,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
     		error(errmsg)
    	end
     if (rhs==5 | rhs==7 | rhs==9) then
-    	errmsg = msprintf(gettext("%s: 2Unexpected number of input arguments : %d provided while it should be 4,6,8,10,11,12,13,14,15"), "fmincon", rhs);
+    	errmsg = msprintf(gettext("%s: Unexpected number of input arguments : %d provided while it should be 4,6,8,10,11,12,13,14,15"), "fmincon", rhs);
     	error(errmsg)
    	end
  
@@ -178,7 +178,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   	
   	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
    	if(execstr('init=_f(x0)','errcatch')==21) then
-		errmsg = msprintf(gettext("%s: Objective function and x0 didnot match"), "fmincon");
+		errmsg = msprintf(gettext("%s: Objective function and x0 did not match"), "fmincon");
    		error(errmsg);
 	end
    	
@@ -231,7 +231,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   	end
   	
   	//To check for correct size of Aeq (5th paramter)
-   	if(size(Aeq,2)~=s(2) & size(Aeq,2)~=0) thens
+   	if(size(Aeq,2)~=s(2) & size(Aeq,2)~=0) then
    		errmsg = msprintf(gettext("%s: Expected Matrix of size (No of Linear Equality Constraints X No of Variables) or an Empty Matrix for Linear Equality Constraint coefficient Matrix Aeq"), "fmincon");
    		error(errmsg);
    	end
@@ -330,7 +330,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
     		error(errmsg); 
 		end	
 		if(ub(i)-lb(i)<=1e-6) then
-			errmsg = msprintf(gettext("%s: Difference between Upper Bound and Lower bound should be atleast > 10^6 for variable No.= %d "), "fminbnd", i);
+			errmsg = msprintf(gettext("%s: Difference between Upper Bound and Lower bound should be atleast > 10^6 for variable No.= %d "), "fmincon", i);
     		error(errmsg)
     	end
 	end
@@ -367,7 +367,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 	//Returns "Invalid Index" Error if size of x0 is not matched with _nlc(10th Parameter)
    	if (no_nlc==1) then
    		if(execstr('init1=_nlc(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Non-Linear Constraint function(9th Parameter) and x0(2nd Parameter) didnot match "), "fmincon");
+			errmsg = msprintf(gettext("%s: Non-Linear Constraint function(9th Parameter) and x0(2nd Parameter) did not match "), "fmincon");
    			error(errmsg);
 		end
    		init1=_nlc(x0);
@@ -554,7 +554,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    			error(errmsg);
    		end
    		if(execstr('sample_fg=_fg(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 didnot match "), "fmincon", rhs);
+			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 did not match "), "fmincon", rhs);
    			error(errmsg);
 		end
 		sample_fg=_fg(x0);
@@ -569,7 +569,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    			error(errmsg);
    		end
    		if(execstr('sample_fh=_fh(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 didnot match "), "fmincon", rhs);
+			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 did not match "), "fmincon", rhs);
    			error(errmsg);
 		end
 		sample_fh=_fh(x0);
@@ -584,7 +584,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    			error(errmsg);
    		end
    		if(execstr('sample_cg=_cg(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Gradient function of Constraint and x0 didnot match "), "fmincon", rhs);
+			errmsg = msprintf(gettext("%s: Gradient function of Constraint and x0 did not match "), "fmincon", rhs);
    			error(errmsg);
 		end
 		sample_cg=_cg(x0);
@@ -599,12 +599,12 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    
 	//Calculating the values for output   	
    	xopt = xopt';
-    exitflag = status;
-    output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
+    	exitflag = status;
+    	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
-    output.Cpu_Time = cpu;
-    output.Objective_Evaluation = obj_eval;
-    output.Dual_Infeasibility = dual;
+    	output.Cpu_Time = cpu;
+    	output.Objective_Evaluation = obj_eval;
+    	output.Dual_Infeasibility = dual;
 
     //Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
     s=size(gradient)
@@ -620,11 +620,11 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 		fopt=[]
 		output = struct("Iterations", [],"Cpu_Time",[]);
 		output.Iterations = iter;
-    	output.Cpu_Time = cpu;
+    		output.Cpu_Time = cpu;
 		lambda=[]
 		gradient=[]
 		hessian=[]
-	end
+    end
 		
 
 	//To print Output Message

@@ -59,7 +59,8 @@ bool minconNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g, Index& nnz_h_
 bool minconNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Number* g_l, Number* g_u)
 {
 	unsigned int i;
-
+	
+	//assigning bounds for the variables
 	for(i=0;i<n;i++)
 	{
 		x_l[i]=varLB_[i];
@@ -76,26 +77,30 @@ bool minconNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Numb
 	{
 		unsigned int c=0;
 
+		//bounds of linear equality constraints
 		for(i=0;i<Aeqrows_;i++)
 		{
 			g_l[c]=g_u[c]=beq_[i];
 			c++;
 		}
 
+		//bounds of linear inequality constraints
 		for(i=0;i<Arows_;i++)
 		{
 			g_l[c]=-1.0e19;
 			g_u[c]=b_[i];
-			cout<<"const. bound"<<b_[i];
+			
 			c++;
 		}
 
+		//bounds of non-linear equality constraints
 		for(i=0;i<nonlinCon_-nonlinIneqCon_;i++)
 		{
 			g_l[c]=g_u[c]=0;
 			c++;
 		}
 
+		//bounds of non-linear inequality constraints
 		for(i=0;i<nonlinIneqCon_;i++)
 		{
 			g_l[c]=-1.0e19;
@@ -122,6 +127,7 @@ bool minconNLP::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
 	{
 		unsigned int c=0;
 
+		//value of linear equality constraints
 		for(i=0;i<Aeqrows_;i++)
 		{
 			g[c]=0;
@@ -130,6 +136,7 @@ bool minconNLP::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
 			c++;			
 		}
 
+		//value of linear inequality constraints
 		for(i=0;i<Arows_;i++)
 		{
 			g[c]=0;
@@ -138,6 +145,7 @@ bool minconNLP::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
 			c++;
 		}
 
+		//value of non-linear constraints
 		if(nonlinCon_!=0)
 		{
 			int* constr=NULL;  
@@ -210,6 +218,7 @@ bool minconNLP::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index n
 		{
 			unsigned int i,j,c=0;
 
+			//jacobian of linear equality constraints
 			for(i=0;i<Aeqrows_;i++)
 			{
 				for(j=0;j<Aeqcols_;j++)
@@ -219,6 +228,7 @@ bool minconNLP::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index n
 				}
 			}
 
+			//jacobian of linear inequality constraints
 			for(i=0;i<Arows_;i++)
 			{
 				for(j=0;j<Acols_;j++)
@@ -228,7 +238,7 @@ bool minconNLP::eval_jac_g(Index n, const Number* x, bool new_x,Index m, Index n
 				}
 			}
 
-
+			//jacobian of non-linear constraints
 			if(nonlinCon_!=0)
 			{
 				if(flag3_==0)
@@ -416,7 +426,7 @@ bool minconNLP::get_starting_point(Index n, bool init_x, Number* x,bool init_z, 
 	if (init_x == true)
 	{ //we need to set initial values for vector x
 		for (Index var=0;var<n;var++)
-			x[var]=varGuess_[var];//initialize with 0 or we can change.
+			x[var]=varGuess_[var];
 	}
 
 	return true;
@@ -446,7 +456,7 @@ bool minconNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 
 	else 
 	{
-		
+		//hessian of the objective function		
 		if(flag2_==0)
 	  	{
 			int* gradhessptr=NULL;
@@ -504,6 +514,7 @@ bool minconNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
        			resh[i]=resTemph[i];
 		}
 
+		//sum of hessians of constraints each multiplied by its own lambda factor
 		double* sum=(double*)malloc(sizeof(double)*n*n);
 		if(nonlinCon_!=0)
 		{	
@@ -537,7 +548,7 @@ bool minconNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 			}
 		
 			Index j;
-			cout<<"Inside";	
+			
 			for(i=0;i<numVars_*numVars_;i++)
 			{
 				sum[i]=0;
@@ -552,6 +563,7 @@ bool minconNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
 				sum[i]=0;
 		}
 		
+		//computing the lagrangian
 		Index index=0;
 		for (Index row=0;row < numVars_ ;++row)
 		{
@@ -573,7 +585,7 @@ bool minconNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
        	return true;
 }
 
-
+//returning the results
 void minconNLP::finalize_solution(SolverReturn status,Index n, const Number* x, const Number* z_L, const Number* z_U,Index m, const Number* g, const Number* lambda, Number obj_value,const IpoptData* ip_data,IpoptCalculatedQuantities* ip_cq)
 {
 	finalX_ = (double*)malloc(sizeof(double) * numVars_ * 1);

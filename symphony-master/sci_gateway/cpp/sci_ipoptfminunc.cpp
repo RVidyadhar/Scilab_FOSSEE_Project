@@ -89,8 +89,8 @@ int sci_solveminuncp(char *fname)
 		return 1;
 	}
 
-    //Getting number of iterations
-    if(getFixedSizeDoubleMatrixInList(8,2,temp1,temp2,&max_iter))
+    	//Getting number of iterations
+    	if(getFixedSizeDoubleMatrixInList(8,2,temp1,temp2,&max_iter))
 	{
 		return 1;
 	}

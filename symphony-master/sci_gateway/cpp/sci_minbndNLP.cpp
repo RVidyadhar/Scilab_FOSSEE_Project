@@ -54,7 +54,6 @@ bool minbndNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Numb
 		x_u[i]=varUB_[i];
 	}
 	
-
         g_l=NULL;
         g_u=NULL;
 
@@ -64,8 +63,8 @@ bool minbndNLP::get_bounds_info(Index n, Number* x_l, Number* x_u, Index m, Numb
 // return the value of the constraints: g(x)
 bool minbndNLP::eval_g(Index n, const Number* x, bool new_x, Index m, Number* g)
 {
-  g=NULL;
-  return true;
+  	g=NULL;
+  	return true;
 }
 
 // return the structure or values of the jacobian
@@ -96,7 +95,6 @@ bool minbndNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
   	char name[20]="_f";
   	double obj=0;
   	double *xNew=x;
-	cout<<"x value"<<x[0];
   	createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
   	int positionFirstElementOnStackForScilabFunction = 3;
   	int numberOfRhsOnScilabFunction = 1;
@@ -127,7 +125,6 @@ bool minbndNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f
   	}  
   	double *xNew=x;
   	double t=1;
-	cout<<"x value"<<x[0];
   	createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
   	createScalarDouble(pvApiCtx, 4,t);
   	int positionFirstElementOnStackForScilabFunction = 3;
@@ -162,7 +159,10 @@ bool minbndNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f
 // This method sets initial values for required vectors . For now we are assuming 0 to all values. 
 bool minbndNLP::get_starting_point(Index n, bool init_x, Number* x,bool init_z, Number* z_L, Number* z_U,Index m, bool init_lambda,Number* lambda)
 {
-	x[0]=0;
+	Index i;
+	for(i=0;i<n;i++)
+		x[i]=0;
+
 	return true;
 }
 

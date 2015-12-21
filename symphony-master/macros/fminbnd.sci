@@ -14,11 +14,11 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
   // Solves a minimum of single-variable function on open bounded interval
   //
   //   Calling Sequence
-  //   xopt = fminunc(_f,x1,x2)
-  //   xopt = fminunc(_f,x1,x2,options)
-  //   [xopt,fopt] = fminunc(.....)
-  //   [xopt,fopt,exitflag]= fminunc(.....)
-  //   [xopt,fopt,exitflag,output]=fminunc(.....)
+  //   xopt = fminbnd(_f,x1,x2)
+  //   xopt = fminbnd(_f,x1,x2,options)
+  //   [xopt,fopt] = fminbnd(.....)
+  //   [xopt,fopt,exitflag]= fminbnd(.....)
+  //   [xopt,fopt,exitflag,output]=fminbnd(.....)
   //
   //
   //   Parameters
@@ -34,14 +34,14 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
   //   output   : Structure containing information about the optimization.
   //
   //   Description
-  //   Search the minimum of a single-variable function on open bounded interval specified by :
+  //   Search the minimum of a multi-variable function on a closed bounded interval specified by :
   //   find the minimum of f(x) such that 
   //
   //   <latex>
   //    \begin{eqnarray}
   //    &\mbox{min}_{x}
   //    & f(x)\\
-  //    & \text{subject to} & x1 \< x \< x2 \\
+  //    & \text{subject to} & x1 \<= x \<= x2 \\
   //    \end{eqnarray}
   //   </latex>
   //
@@ -131,7 +131,7 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
 	
 	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
    	if(execstr('init=_f(x1)','errcatch')==21) then
-		errmsg = msprintf(gettext("%s: Objective function and bounds didnot match"), "fmincon");
+		errmsg = msprintf(gettext("%s: Objective function and bounds did not match"), "fminbnd");
    		error(errmsg);
 	end
 
@@ -177,9 +177,9 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    	exitflag = status;
    	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
-    output.Cpu_Time = cpu;
-    output.Objective_Evaluation = obj_eval;
-    output.Dual_Infeasibility = dual;
+    	output.Cpu_Time = cpu;
+    	output.Objective_Evaluation = obj_eval;
+    	output.Dual_Infeasibility = dual;
 
 	//In the cases of the problem not being solved return NULL to the output matrices
 	if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then

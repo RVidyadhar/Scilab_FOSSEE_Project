@@ -5,8 +5,8 @@ endfunction
 x0 = [0.5,0];
 
 
-//exec builder.sce
-//exec loader.sce
+exec builder.sce
+exec loader.sce
 
 
 options=list("MaxIter", [1500], "CpuTime", [500], "Gradient", "OFF", "Hessian", "OFF");

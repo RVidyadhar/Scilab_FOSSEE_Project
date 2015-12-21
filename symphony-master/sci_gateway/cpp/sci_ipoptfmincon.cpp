@@ -43,7 +43,7 @@ int sci_solveminconp(char *fname)
 	double flag1=0,flag2=0,flag3=0,nonlinCon=0,nonlinIneqCon=0;
         
 
-    // Input arguments
+    	// Input arguments
 	double *cpu_time=NULL,*max_iter=NULL;
 	static unsigned int nVars = 0,nCons = 0;
 	unsigned int temp1 = 0,temp2 = 0, iret = 0;
@@ -90,45 +90,55 @@ int sci_solveminconp(char *fname)
 		return 1;
 	}
 
+	//Getting matrix representing linear inequality constraints 
 	if(getDoubleMatrixFromScilab(3, &A_rows, &A_cols, &Aptr))
 	{
 		return 1;
 	}
 
+	//Getting matrix representing bounds of linear inequality constraints 
 	if(getDoubleMatrixFromScilab(4, &b_rows, &b_cols, &bptr))
 	{
 		return 1;
 	}
-
+	
+	//Getting matrix representing linear equality constraints 
 	if(getDoubleMatrixFromScilab(5, &Aeq_rows, &Aeq_cols, &Aeqptr))
 	{
 		return 1;
 	}
 
+	//Getting matrix representing bounds of linear inequality constraints 
 	if(getDoubleMatrixFromScilab(6, &beq_rows, &beq_cols, &beqptr))
 	{
 		return 1;
 	}
 
+	//Getting matrix representing linear inequality constraints 
 	if(getDoubleMatrixFromScilab(7, &lb_rows, &lb_cols, &lbptr))
 	{
 		return 1;
 	}
 
+	//Getting matrix representing linear inequality constraints 
 	if(getDoubleMatrixFromScilab(8, &ub_rows, &ub_cols, &ubptr))
 	{
 		return 1;
 	}
 
+	//Number of non-linear constraints
 	if(getDoubleFromScilab(9, &nonlinCon))
 	{
 		return 1;
 	}
 
+	//Number of non-linear inequality constraints
 	if(getDoubleFromScilab(10, &nonlinIneqCon))
 	{
 		return 1;
 	}
+
+	//Getting the required flag variables
 
 	if(getDoubleFromScilab(12, &flag1))
 	{
@@ -145,8 +155,10 @@ int sci_solveminconp(char *fname)
 		return 1;
 	}
 
+	//Number of variables and constraints
 	nVars = x0_cols;
 	nCons = A_rows + Aeq_rows + nonlinCon;
+
         
         // Starting Ipopt
 
@@ -168,19 +180,17 @@ int sci_solveminconp(char *fname)
 	  	sciprint("\n*** Error during initialization!\n");
    		return (int) status;
  	 }
+	 
 	 // Ask Ipopt to solve the problem
-	
 	 status = app->OptimizeTNLP(Prob);
 	 
+	 //Get the solve statistics
 	 cpuTime = app->Statistics()->TotalCPUTime();
-
 	 app->Statistics()->NumberOfEvaluations(int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval);
-	 
 	 app->Statistics()->Infeasibilities(dual_inf, constr_viol, complementarity, kkt_error);
-
 	 rstatus = Prob->returnStatus();
+	 fobj_eval=(double)int_fobj_eval;
          
-
 	////////// Manage the output argument //////////
 
 	fX = Prob->getX();
@@ -189,6 +199,7 @@ int sci_solveminconp(char *fname)
 	fLambda = Prob->getLambda();
 	ObjVal = Prob->getObjVal();
 	iteration = Prob->iterCount();
+
 	if (returnDoubleMatrixToScilab(1, 1, nVars, fX))
 	{
 		return 1;

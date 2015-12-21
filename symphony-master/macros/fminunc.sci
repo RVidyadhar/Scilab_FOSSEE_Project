@@ -127,7 +127,7 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 
   	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
    	if(execstr('init=_f(x0)','errcatch')==21) then
-		errmsg = msprintf(gettext("%s: Objective function and x0 didnot match"), "fmincon");
+		errmsg = msprintf(gettext("%s: Objective function and x0 did not match"), "fminunc");
    		error(errmsg);
 	end
    
@@ -232,17 +232,17 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
    	//To check the correct no. of inputs given by the user
    	if (flag1==0 & flag2==0)
    		if(rhs>3) then
-        	errmsg = msprintf(gettext("%s: Only 3 Inputs are Needed for this option(GradObj=OFF, HessObj=OFF), but %d were recorded"), "fmincon",rhs);
+        	errmsg = msprintf(gettext("%s: Only 3 Inputs are Needed for this option(GradObj=OFF, HessObj=OFF), but %d were recorded"), "fminunc",rhs);
 			error(errmsg); 
 		end
    elseif ((flag1==1 & flag2==0) | (flag1==0 & flag2==1)) then
   		if(rhs>12) then
-        	errmsg = msprintf(gettext("%s: Only 4 Inputs were needed for this option, but %d were recorded"), "fmincon",rhs);
+        	errmsg = msprintf(gettext("%s: Only 4 Inputs were needed for this option, but %d were recorded"), "fminunc",rhs);
 			error(errmsg);
 		end
    elseif (flag1==1 & flag2==1)
    		if(rhs>14) then
-        	errmsg = msprintf(gettext("%s: Only 5 Inputs are Needed for this option(GradObj=ON, HessObj=ON), but %d were recorded"), "fmincon",rhs);
+        	errmsg = msprintf(gettext("%s: Only 5 Inputs are Needed for this option(GradObj=ON, HessObj=ON), but %d were recorded"), "fminunc",rhs);
 			error(errmsg); 
 		end
 	end
@@ -250,31 +250,31 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
   //To check the correct input of Gradient and Hessian Functions from Users	     	
    if (flag1==1) then
    		if (type(_g) ~= 13 & type(_g) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Gradient of Objective, since GradObj=ON"), "fmincon");
+  			errmsg = msprintf(gettext("%s: Expected function for Gradient of Objective, since GradObj=ON"), "fminunc");
    			error(errmsg);
    		end
    		if(execstr('sample_g=_g(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 didnot match "), "fmincon", rhs);
+			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 did not match "), "fminunc", rhs);
    			error(errmsg);
 		end
 		sample_g=_g(x0);
 		if (size(sample_g,1)~=1 | size(sample_g,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Gradient function(%dth Parameter)---->Row Vector function is Expected"), "fmincon",pos_g);
+   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Gradient function(%dth Parameter)---->Row Vector function is Expected"), "fminunc",pos_g);
    			error(errmsg);
    		end
    	end
    	if (flag2==1) then
    		if (type(_h) ~= 13 & type(_h) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Hessian of Objective, since HessObj=ON"), "fmincon");
+  			errmsg = msprintf(gettext("%s: Expected function for Hessian of Objective, since HessObj=ON"), "fminunc");
    			error(errmsg);
    		end
    		if(execstr('sample_h=_h(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 didnot match "), "fmincon", rhs);
+			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 did not match "), "fminunc", rhs);
    			error(errmsg);
 		end
 		sample_h=_h(x0);
    		if(size(sample_h,1)~=s(2) | size(sample_h,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Hessian function(%dth Parameter)---->Symmetric Matrix function is Expected "), "fmincon",pos_h);
+   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Hessian function(%dth Parameter)---->Symmetric Matrix function is Expected "), "fminunc",pos_h);
    			error(errmsg);
    		end
    	end
@@ -287,9 +287,9 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
    	exitflag = status;
    	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
-    output.Cpu_Time = cpu;
-    output.Objective_Evaluation = obj_eval;
-    output.Dual_Infeasibility = dual;
+    	output.Cpu_Time = cpu;
+    	output.Objective_Evaluation = obj_eval;
+    	output.Dual_Infeasibility = dual;
     
     //Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
     s=size(gradient)
@@ -306,8 +306,8 @@ function [xopt,fopt,exitflag,output,gradient,hessian] = fminunc (varargin)
 		fopt=[]
 		output = struct("Iterations", [],"Cpu_Time",[]);
 		output.Iterations = iter;
-    	output.Cpu_Time = cpu;
-    	gradient=[]
+    		output.Cpu_Time = cpu;
+    		gradient=[]
 		hessian=[]
 	end
 		
