@@ -39,9 +39,9 @@
    <title>Parameters</title>
    <variablelist>
    <varlistentry><term>H :</term>
-      <listitem><para> a vector of doubles, where n is number of variables, represents coefficients of quadratic in the quadratic problem.</para></listitem></varlistentry>
+      <listitem><para> a symmetric matrix of doubles, represents coefficients of quadratic in the quadratic problem.</para></listitem></varlistentry>
    <varlistentry><term>f :</term>
-      <listitem><para> a vector of doubles, where n is number of variables, represents coefficients of linear in the quadratic problem</para></listitem></varlistentry>
+      <listitem><para> a vector of doubles, represents coefficients of linear in the quadratic problem</para></listitem></varlistentry>
    <varlistentry><term>A :</term>
       <listitem><para> a vector of doubles, represents the linear coefficients in the inequality constraints</para></listitem></varlistentry>
    <varlistentry><term>b :</term>

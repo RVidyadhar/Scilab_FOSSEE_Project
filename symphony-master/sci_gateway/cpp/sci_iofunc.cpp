@@ -178,7 +178,7 @@ int getDoubleMatrixFromScilab(int argNum, int *rows, int *cols, double **dest)
 		Scierror(errNum,errMsg,argNum);
 		return 1;
 	}
-	getMatrixOfDouble(pvApiCtx, varAddress, rows, cols, dest);
+	sciErr = getMatrixOfDouble(pvApiCtx, varAddress, rows, cols, dest);
 	if (sciErr.iErr)
 	{
 		printError(&sciErr, 0);

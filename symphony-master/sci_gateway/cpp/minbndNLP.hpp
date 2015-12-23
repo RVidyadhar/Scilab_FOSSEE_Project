@@ -27,6 +27,12 @@ class minbndNLP : public TNLP
   	Number *finalX_= NULL;           //finalX_ is a pointer to a matrix of size of 1*1
 				         //with final value for the primal variable.
 
+	Number *finalZl_= NULL;		 //finalZl_ is a pointer to a matrix of size of 1*numVar_
+					 // with final values for the lower bound multipliers
+
+	Number *finalZu_= NULL;		 //finalZu_ is a pointer to a matrix of size of 1*numVar_
+					 // with final values for the upper bound multipliers
+
   	Number finalObjVal_;          	 //finalObjVal_ is a scalar with the final value of the objective.
 
   	int iter_;			 //Number of iteration.
@@ -46,7 +52,7 @@ class minbndNLP : public TNLP
 	public:
 
   	/** user defined constructor */
-  	minbndNLP(Index nV, Index nC,Number *LB,Number *UB):numVars_(nV),numConstr_(nC),finalX_(0),varLB_(LB),varUB_(UB),finalObjVal_(1e20){	}
+  	minbndNLP(Index nV, Index nC,Number *LB,Number *UB):numVars_(nV),numConstr_(nC),finalX_(0),finalZl_(0), finalZu_(0),varLB_(LB),varUB_(UB),finalObjVal_(1e20){	}
 
   	/** default destructor */
   	virtual ~minbndNLP();
@@ -91,6 +97,12 @@ class minbndNLP : public TNLP
   
   	const double * getX();		//Returns a pointer to a matrix of size of 1*1
 					//with final value for the primal variable.
+
+	const double * getZl();		//Returns a pointer to a matrix of size of 1*numVars_
+					// with final values for the lower bound multipliers
+
+	const double * getZu();		//Returns a pointer to a matrix of size of 1*numVars_
+					//with final values for the upper bound multipliers
 
   	double getObjVal();		//Returns the output of the final value of the objective.
 

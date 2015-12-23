@@ -10,46 +10,114 @@
 // http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
 
 
-function [xopt,fopt,exitflag,output] = fminbnd (varargin)
-  // Solves a minimum of single-variable function on open bounded interval
+function [xopt,fopt,exitflag,output,zl,zu] = fminbnd (varargin)
+  // Find minimum of Multi-variable function on boundeed interval
   //
   //   Calling Sequence
-  //   xopt = fminbnd(_f,x1,x2)
-  //   xopt = fminbnd(_f,x1,x2,options)
+  //   xopt = fminbnd(f,x1,x2)
+  //   xopt = fminbnd(f,x1,x2,options)
   //   [xopt,fopt] = fminbnd(.....)
   //   [xopt,fopt,exitflag]= fminbnd(.....)
   //   [xopt,fopt,exitflag,output]=fminbnd(.....)
+  //   [xopt,fopt,exitflag,output,zl,zu]=fminbnd(.....)
   //
   //
   //   Parameters
-  //   _f : a function, represents objective function of the problem 
-  //   x1 : a scalar or vector(1 X 1), contains lower bound
-  //   x2 : a scalar or vector(1 X 1), contains upper bound  
-  //   options : a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, TolX
-  //			 Syntax for option- options= list("MaxIter", [---], "CpuTime", [---],TolX, [---]);
-  //   		     Default Values for Options==> ("MaxIter", [1000000], "CpuTime", [1000000], TolX, [1e-4]);
-  //   xopt : a vector of doubles, the computed solution of the optimization problem.
-  //   fopt : a double, the function value at x.
-  //   exitflag : Integer identifying the reason the algorithm terminated.
-  //   output   : Structure containing information about the optimization.
+  //   f : a function, representing objective function of the problem 
+  //   x1 : a vector, containing lower bound of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables, where n is no. of Variables
+  //   x2 : a vector, containing upper bound of the variables of size (1 X n) or (n X 1) or (0 X 0) where 'n' is the no. of Variables. If x2 is empty it means upper bound is +infinity
+  //   options : a list, containing option for user to specify -Maximum iteration, Maximum CPU-time, TolX
+  //			 Syntax for options- options= list("MaxIter", [---], "CpuTime", [---],TolX, [---]);
+  //   		     Default Values for Options==> ("MaxIter", [3000], "CpuTime", [600], TolX, [1e-4]);
+  //   xopt : a vector of doubles, containing the computed solution of the optimization problem.
+  //   fopt : a scalar of double, containing the function value at x.
+  //   exitflag : a scalar of integer, containing flag which denotes the reason for termination of algorithm
+  //   output : a structure, containing information about the optimization.
+  //   zl : a vector of doubles, containing lower bound multipliers
+  //   zu : a vector of doubles, containing upper bound multipliers
   //
   //   Description
-  //   Search the minimum of a multi-variable function on a closed bounded interval specified by :
+  //   Search the minimum of a multi-variable function on bounded interval specified by :
   //   find the minimum of f(x) such that 
   //
   //   <latex>
   //    \begin{eqnarray}
   //    &\mbox{min}_{x}
   //    & f(x)\\
-  //    & \text{subject to} & x1 \<= x \<= x2 \\
+  //    & \text{subject to} & x1 \ < x \ < x2 \\
   //    \end{eqnarray}
   //   </latex>
   //
-  //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
+  //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++.
   //
+  // Examples
+  //
+  //	//Find x in R^6 such that it minimizes:
+  //    //f(x)= sin(x1) + sin(x2) + sin(x3) + sin(x4) + sin(x5) + sin(x6)
+  //	//-2 <= x1,x2,x3,x4,x5,x6 <= 2
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  //		y=0
+  //		for i =1:6
+  //			y=y+sin(x(i));
+  //		end	
+  //	endfunction
+  //
+  //	//Variable bounds  
+  //	x1 = [-2, -2, -2, -2, -2, -2];
+  //    x2 = [2, 2, 2, 2, 2, 2];
+  //
+  //	//Options
+  //	options=list("MaxIter",[1500],"CpuTime", [100],"TolX",[1e-6])
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,zl,zu] =fminbnd(f, x1, x2, options)
+  //
+  // Examples
+  //
+  //	//Find x in R such that it minimizes:
+  //    //f(x)= 1/x^2
+  //	//0 <= x <= 1000
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  //		y=1/x^2
+  //	endfunction
+  //
+  //	//Variable bounds  
+  //	x1 = [0];
+  //    x2 = [1000];
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,zl,zu] =fminbnd(f, x1, x2)
+  //
+  // Examples
+  //
+  //    The below Problem is an Unbounded problem:
+  //	//Find x in R^2 such that it minimizes:
+  //    //f(x)= -[(x1-1)^2 + (x2-1)^2]
+  //	//-inf <= x1,x2 <= inf
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  // 		y=-((x(1)-1)^2+(x(2)-1)^2);
+  //	endfunction
+  //
+  //	//Variable bounds  
+  //	x1 = [-%inf , -%inf];
+  //    x2 = [];
+  //
+  //	//Options
+  //	options=list("MaxIter",[1500],"CpuTime", [100],"TolX",[1e-6])
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,zl,zu] =fminbnd(f, x1, x2, options)  
   //
   // Authors
   // R.Vidyadhar , Vignesh Kannan
+
+
    	//To check the number of input and output argument
    	[lhs , rhs] = argn();
 	
@@ -60,10 +128,17 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    	end
    
    	//Storing the 1st and 2nd Input Parameters  
-   	_f = varargin(1);
+   	fun = varargin(1);
    	x1 = varargin(2);
    	x2 = varargin(3);
 
+	function y = f(x)
+		if(execstr('y=fun(x)','errcatch')==27) then
+			errmsg = msprintf(gettext("%s: Please change the Objective function, there is division by zero Warning"), "fminbnd");
+   			error(errmsg);
+		end
+		y=fun(x);
+	endfunction
    	
    	//To check whether the 2nd Input argument (x1) is a Vector/Scalar
    	if (type(x1) ~= 1) then
@@ -71,9 +146,9 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    		error(errmsg);
   	end
   	
-  	//To check for correct size and data of x1 (2nd paramter) and Converting it to Column Vector as required by Ipopt
-   	if (size(x1,2)==0) then
-        x1 = repmat(-%inf,1,s(2));
+  	if (size(x1,2)==0) then
+        errmsg = msprintf(gettext("%s: Lower Bound (2nd Parameter) cannot be empty"), "fminbnd");
+   		error(errmsg);
     end
     
    	if (size(x1,1)~=1) & (size(x1,2)~=1) then
@@ -94,7 +169,7 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
    	
    	//To check for correct size and data of x2 (3rd paramter) and Converting it to Column Vector as required by Ipopt
     if (size(x2,2)==0) then
-        x2 = repmat(%inf,1,s(2));
+		x2 = repmat(%inf,s(1),1);
     end
     
     if (size(x2,1)~=1)& (size(x2,2)~=1) then
@@ -129,12 +204,13 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
     	end
 	end
 	
-	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
-   	if(execstr('init=_f(x1)','errcatch')==21) then
+	//To check the match between f (1st Parameter) & x0 (2nd Parameter)
+
+   	if(execstr('init=f(x1)','errcatch')==21) then
 		errmsg = msprintf(gettext("%s: Objective function and bounds did not match"), "fminbnd");
    		error(errmsg);
 	end
-
+	
    	//To check, Whether Options is been entered by user  
    	if ( rhs<4 | size(varargin(4)) ==0 ) then
       		param = list(); 
@@ -161,25 +237,26 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
 
    	
    	//Defining a function to calculate Gradient or Hessian.
-   	function y=_gradhess(x,t)
+   	function y=gradhess(x,t)
 		if t==1 then
-			y=numderivative(_f,x)
+			y=numderivative(f,x)
 		else
-			[grad,y]=numderivative(_f,x)
+			[grad,y]=numderivative(f,x)
 		end
    	endfunction
    
    	//Calling sci_solveminuncp by sending the inputted paramters 
-   	[xopt,fopt,status,iter,cpu,obj_eval,dual] = solveminbndp(_f,_gradhess,x1,x2,options);
+	
+	[xopt,fopt,status,iter,cpu,obj_eval,dual,zl,zu] = solveminbndp(f,gradhess,x1,x2,options);
    
    	//Calculating the values for output
    	xopt = xopt';
    	exitflag = status;
    	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
-    	output.Cpu_Time = cpu;
-    	output.Objective_Evaluation = obj_eval;
-    	output.Dual_Infeasibility = dual;
+    output.Cpu_Time = cpu;
+    output.Objective_Evaluation = obj_eval;
+    output.Dual_Infeasibility = dual;
 
 	//In the cases of the problem not being solved return NULL to the output matrices
 	if( status~=0 & status~=1 & status~=2 & status~=4 & status~=7 ) then
@@ -188,6 +265,8 @@ function [xopt,fopt,exitflag,output] = fminbnd (varargin)
 		output = struct("Iterations", [],"Cpu_Time",[]);
 		output.Iterations = iter;
     	output.Cpu_Time = cpu;
+		zl=[];
+		zu=[];
 	end
 	
     //To print Output Message

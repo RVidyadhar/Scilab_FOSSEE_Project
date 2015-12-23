@@ -11,61 +11,57 @@
 
 
 
-function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin)
+function [xopt,fopt,exitflag,output,lambda,gradient,hessian,zl,zu] = fmincon (varargin)
   // Solves a Constrainted Optimization Problem
   //
   //   Calling Sequence
-  //   xopt = fmincon(_f,x0,A,b)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_fg)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_fg,_fh)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_fh)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_cg) 
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_fg,_cg)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_fg,_fh,_cg)
-  //   xopt = fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_fh,_cg)
+  //   xopt = fmincon(f,x0,A,b)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad,lHess)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,lHess)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,cGrad) 
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad,cGrad)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,lHess,cGrad)
+  //   xopt = fmincon(f,x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad,lHess,cGrad)
   //   [xopt,fopt] = fmincon(.....)
   //   [xopt,fopt,exitflag]= fmincon(.....)
   //   [xopt,fopt,exitflag,output]= fmincon(.....)
   //   [xopt,fopt,exitflag,output,lambda]=fmincon(.....)
   //   [xopt,fopt,exitflag,output,lambda,gradient]=fmincon(.....)
   //   [xopt,fopt,exitflag,output,lambda,gradient,hessian]=fmincon(.....)
+  //   [xopt,fopt,exitflag,output,lambda,gradient,hessian,zl]=fmincon(.....)
+  //   [xopt,fopt,exitflag,output,lambda,gradient,hessian,zl,zu]=fmincon(.....)
   //
   //   Parameters
-  //   _f : a function, represents objective function of the problem 
-  //   x0 : a vector of doubles, contains starting of variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
-  //   A : a matrix of doubles, contains coefficients of Linear Inequality Constraints of size (m X n) where 'm' is the no. of Linear Inequality Constraint & 'n' is the 
-  //       no. of Variables
-  //   b : a vector of doubles, related to 'A' and contains the rhs of the Linear Inequality Constraints of size (m X 1)
-  //   Aeq : a matrix of doubles, contains coefficients of Linear Equality Constraints of size (m1 X n) where 'm1' is the no. of Linear Equality Constraint & 'n' is the 
-  //         no. of Variables
-  //   beq : a vector of doubles, related to 'Aeq' and contains the rhs of the Linear Equality Constraints of size (m1 X 1)
-  //   lb : a vector of doubles, contains lower bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
-  //   ub : a vector of doubles, contains upperss bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
-  //   no_nlic : a scalar of double, related to '_nlc' contains the number of Non-linear In equality constraints in the  Non-linear constraint function('_nlc')
-  //   _nlc : a function, represents Non-linear constraint functions(Both Equality and Inequality) of the problem. It is declared in such a way that non-linear 
-  //          Inequality constraints are defined first, followed by non-linear Equality constraints
-  //		  Note: Constraints should be declared as a vector form (Refer Example Below)  
-  //   options: a list, contains option for user to specify -Maximum iteration, Maximum CPU-time, GradObj, HessObj& GradCon.
-  //            Syntax for option- options= list("MaxIter", [---], "CpuTime", [---], "GradObj", "ON/OFF", "HessObj", "ON/OFF", "GradCon", "ON/OFF");
-  //   		    Default Values for Options==> ("MaxIter", [1000000], "CpuTime", [60], "GradObj", "OFF", "HessObj", "OFF", "GradCon", "OFF");
-  //   _fg : a function, represents gradient function of the Objective in Vector Form
-  //   _fh : a function, represents hessian function of the Objective in Symmetric Matrix Form
-  //   _cg : a function, represents gradient function of the Non-Linear Constraints in Vector Form
-  //		 Note: Each element of the constraint's Gradient should be declared seperately as an element of one Vector (Refer Example Below)  
-  //   xopt : a vector of doubles, the computed solution of the optimization problem.
-  //   fopt : a double, the function value at x
-  //   exitflag : Integer identifying the reason the algorithm terminated
-  //   output : Structure containing information about the optimization
-  //   lambda : a vector of doubles, contains Lagrange multipliers at the optimized point
-  //   gradient : a vector of doubles, contains Objective's gradient of the optimized point
-  //   hessian  : a matrix of doubles, contains Objective's hessian of the optimized point
+  //   f : a function, representing objective function of the problem 
+  //   x0 : a vector of doubles, containing starting values of variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
+  //   A : a matrix of doubles, containing coefficients of Linear Inequality Constraints of size (m X n) where 'm' is the no. of Linear Inequality Constraint 
+  //   b : a vector of doubles, related to 'A' and containing the Right hand side equation of the Linear Inequality Constraints of size (m X 1)
+  //   Aeq : a matrix of doubles, containing coefficients of Linear Equality Constraints of size (m1 X n) where 'm1' is the no. of Linear Equality Constraint
+  //   beq : a vector of doubles, related to 'Aeq' and containing the Right hand side equation of the Linear Equality Constraints of size (m1 X 1)
+  //   lb : a vector of doubles, containing lower bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
+  //   ub : a vector of doubles, containing upper bounds of the variables of size (1 X n) or (n X 1) where 'n' is the no. of Variables
+  //   nlc : a function, representing Non-linear constraint functions(both Equality and Inequality) of the problem. It is declared in such a way that non-linear Inequality constraints are defined first as a single row vector (c), followed by non-linear Equality constraints as another single row vector (ceq)
+  //   options : a list, containing option for user to specify -Maximum iteration, Maximum CPU-time, GradObj, Hessian & GradCon.         Syntax for options- options= list("MaxIter", [---], "CpuTime", [---], "GradObj", "ON/OFF", "Hessian", "ON/OFF", "GradCon", "ON/OFF");       Default Values for Options==> ("MaxIter", [10000], "CpuTime", [600], "GradObj", "OFF", "Hessian", "OFF", "GradCon", "OFF");
+  //   fGrad : a function, representing gradient function of the Objective in Vector Form
+  //   lHess : a function, representing hessian function of the Lagrange in Symmetric Matrix Form
+  //   cGrad : a function, representing gradient of the Non-Linear Constraints (both Equality and Inequality) of the problem. It is declared in such a way that gradient of non-linear Inequality constraints are defined first as a separate Matrix (cg of size m2 X n as empty), followed by gradient of non-linear Equality constraints as a separate Matrix (ceqg of size m2 X n or as empty) where m2 & m3 are no. of Non-linear Inequality and Equality constraints respectively
+  //   xopt : a vector of doubles, cointating the computed solution of the optimization problem
+  //   fopt : a scalar of double, containing the function value at x
+  //   exitflag : a scalar of integer, containing flag which denotes the reason for termination of algorithm
+  //   output : a structure, containing information about the optimization
+  //   lambda : a vector of doubles, containing Lagrange multipliers at the optimized point
+  //   gradient : a vector of doubles, containing Objective's gradient of the optimized point
+  //   hessian  : a matrix of doubles, containing Objective's hessian of the optimized point
+  //   zl : a vector of doubles, containing lower bound multipliers
+  //   zu : a vector of doubles, containing upper bound multipliers
   //
   //   Description
-  //   Search the minimum of a unconstrained optimization problem specified by :
+  //   Search the minimum of a Constrained optimization problem specified by :
   //   find the minimum of f(x) such that 
   //
   //   <latex>
@@ -73,42 +69,194 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   //    &\mbox{min}_{x}
   //    & f(x) \\
   //    & \text{subject to} & A*x \leq b \\
-  //    & & Aeq*x \= beq\\
-  //	& & _nlc(x) \leq / = 0\\
-  //    & & conLB \leq C(x) \leq conUB \\
+  //    & & Aeq*x \ = beq\\
+  //	& & c(x) \leq  0\\
+  //    & & ceq(x) \ =  0\\
   //    & & lb \leq x \leq ub \\
   //    \end{eqnarray}
   //   </latex>
   //
-  //   We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.
+  //   We are calling IPOpt for solving the Constrained problem, IPOpt is a library written in C++.
   //
   // Examples
-  //      //Find x in R^2 such that the below function is minimum
-  //      //f = x(1)^2 + 2*x(2)
-  //      //Starting Point: [0,0]
-  //	  //Constraint 1, c(1)==>x(1)^2+x(2)^2=1
-  //	  //Constraint's Gradient c'(1)=[2*x(1),2*x(2)]
   //
-  //      function y= _f(x)
-  //   	     y= x(1)^2 + 2*x(2);
-  //      endfunction
-  //      x0=[0,0];
-  //	  A=[];
-  //	  b=[];
-  //      Aeq=[];
-  //      beq=[];
-  //      lb=[];
-  //      ub=[];
-  //      no_nlic=0;
-  //      function y= _nlc(x)
-  //   	     y= x(1)^2 + x(2)^2 -1;
-  //      endfunction
-  //      options=list(("MaxIter", [1000000], "CpuTime", [60], "GradObj", "OFF", "HessObj", "OFF", "GradCon", "ON");
-  //      function [y]=_cg(x)
-  //	     y(1)=2*x(1);
-  //         y(2)=2*x(2);
-  //      endfunction
-  //      [xopt,fopt]=fmincon(_f,x0,A,b,Aeq,beq,lb,ub,no_nlic,_nlc,options,_cg)
+  //	//Find x in R^2 such that it minimizes:
+  //    //f(x)= -x1 -x2/3
+  //    //x0=[0,0]
+  //    //constraint-1 (c1): x1 + x2 <= 2
+  //    //constraint-2 (c2): x1 + x2/4 <= 1 
+  //    //constraint-3 (c3): x1 - x2 <= 2
+  //    //constraint-4 (c4): -x1/4 - x2 <= 1
+  //    //constraint-5 (c5): -x1 - x2 <= -1
+  //    //constraint-6 (c6): -x1 + x2 <= 2
+  //    //constraint-7 (c7): x1 + x2 = 2  
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  //		y=-x(1)-x(2)/3;
+  //	endfunction
+  //
+  //	//Starting point, linear constraints and variable bounds  
+  //	x0=[0 , 0 , 0];
+  //	A=[1,1 ; 1,1/4 ; 1,-1 ; -1/4,-1 ; -1,-1 ; -1,1];
+  //	b=[2;1;2;1;-1;2];
+  //	Aeq=[1,1];
+  // 	beq=[2];
+  //	lb=[];
+  //	ub=[];
+  //
+  //	//Options
+  //	options=list("GradObj", "ON", "Hessian", "ON","GradCon", "OFF");
+  //
+  //	//Gradient of objective function
+  //	function y= fGrad(x)
+  //		y= [-1,-1/3];
+  // 	endfunction
+  //
+  //	//Hessian of lagrangian
+  //	function y= lHess(x,obj,lambda)
+  //		y= obj*[0,0;0,0] 
+  //  	endfunction
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,lambda,grad,hessian,zl,zu] =fmincon(f, x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad,lHess)
+  //
+  // Examples
+  //
+  //	//Find x in R^3 such that it minimizes:
+  //    //f(x)= x1*x2 + x2*x3
+  //    //x0=[0.1 , 0.1 , 0.1]
+  //    //constraint-1 (c1): x1^2 - x2^2 + x3^2 <= 2
+  //    //constraint-2 (c2): x1^2 + x2^2 + x3^2 <= 10  
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  //		y=x(1)*x(2)+x(2)*x(3);
+  //	endfunction
+  //
+  //	//Starting point, linear constraints and variable bounds  
+  //	x0=[0.1 , 0.1 , 0.1];
+  //	A=[];
+  //	b=[];
+  //	Aeq=[];
+  // 	beq=[];
+  //	lb=[];
+  //	ub=[];
+  //
+  //	//Nonlinear constraints  
+  //	function [c,ceq]=nlc(x)
+  //		c = [x(1)^2 - x(2)^2 + x(3)^2 - 2 , x(1)^2 + x(2)^2 + x(3)^2 - 10];
+  //  		ceq = [];
+  //	endfunction
+  //
+  //	//Options  
+  //	options=list("MaxIter", [1500], "CpuTime", [500], "GradObj", "ON", "Hessian", "ON","GradCon", "ON");
+  //
+  //	//Gradient of objective function
+  //	function y= fGrad(x)
+  //		y= [x(2),x(1)+x(3),x(2)];
+  //	endfunction
+  //
+  //    //Hessian of the Lagrange Function
+  //	function y= lHess(x,obj,lambda)
+  //		y= obj*[0,1,0;1,0,1;0,1,0] + lambda(1)*[2,0,0;0,-2,0;0,0,2] + lambda(2)*[2,0,0;0,2,0;0,0,2]
+  //	endfunction
+  //
+  //    //Gradient of Non-Linear Constraints
+  //	function [cg,ceqg] = cGrad(x)
+  //		cg=[2*x(1) , -2*x(2) , 2*x(3) ; 2*x(1) , 2*x(2) , 2*x(3)];
+  //		ceqg=[];
+  //	endfunction
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,lambda,grad,hessian,zl,zu] =fmincon(f, x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad,lHess,cGrad)
+  //
+  // Examples
+  //
+  //    The below Problem is an Unbounded problem:
+  //	//Find x in R^3 such that it minimizes:
+  //    //f(x)= -(x1^2 + x2^2 + x3^2)
+  //    //x0=[0.1 , 0.1 , 0.1]
+  //    //  x1 <= 0
+  //    //  x2 <= 0
+  //    //  x3 <= 0
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  //		y=-(x(1)^2+x(2)^2+x(3)^2);
+  //	endfunction
+  //
+  //	//Starting point, linear constraints and variable bounds  
+  //	x0=[0.1 , 0.1 , 0.1];
+  //	A=[];
+  //	b=[];
+  //	Aeq=[];
+  // 	beq=[];
+  //	lb=[];
+  //	ub=[0,0,0];
+  //
+  //	//Options
+  //	options=list("MaxIter", [1500], "CpuTime", [500], "GradObj", "OFF", "Hessian", "OFF","GradCon", "OFF");
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,lambda,grad,hessian,zl,zu] =fmincon(f, x0,A,b,Aeq,beq,lb,ub,[],options)
+  //
+  // Examples
+  //
+  //    The below Problem is an Infeasible problem:
+  //	//Find x in R^3 such that in minimizes:
+  //    //f(x)=x1*x2 + x2*x3
+  //    //x0=[1,1,1]
+  //    //constraint-1 (c1): x1^2 <= 1
+  //    //constraint-2 (c2): x1^2 + x2^2 <= 1    
+  //    //constraint-3 (c3): x3^2 <= 1  
+  //    //constraint-4 (c4): x1^3 = 0.5  
+  //    //constraint-5 (c5): x2^2 + x3^2 = 0.75
+  //    // 0 <= x1 <=0.6
+  //    // 0.2 <= x2 <= inf
+  //    // -inf <= x3 <= 1
+  //
+  //    //Objective function to be minimised
+  //    function y=f(x)
+  //		y=x(1)*x(2)+x(2)*x(3);
+  //	endfunction
+  //
+  //	//Starting point, linear constraints and variable bounds  
+  //	x0=[1,1,1];
+  //	A=[];
+  //	b=[];
+  //	Aeq=[];
+  // 	beq=[];
+  //	lb=[0 0.2,-%inf];
+  //	ub=[0.6 %inf,1];
+  //
+  //	//Nonlinear constraints  
+  //	function [c,ceq]=nlc(x)
+  //		c=[x(1)^2-1,x(1)^2+x(2)^2-1,x(3)^2-1];
+  //		ceq=[x(1)^3-0.5,x(2)^2+x(3)^2-0.75];
+  //	endfunction
+  //
+  //	//Options  
+  //	options=list("MaxIter", [1500], "CpuTime", [500], "GradObj", "ON", "Hessian", "ON","GradCon", "ON");
+  //
+  //	//Gradient of objective function
+  //	function y= fGrad(x)
+  //		y= [x(2),x(1)+x(3),x(2)];
+  //	endfunction
+  //
+  //    //Hessian of the Lagrange Function
+  //	function y= lHess(x,obj,lambda)
+  //		y= obj*[0,1,0;1,0,1;0,1,0] + lambda(1)*[2,0,0;0,0,0;0,0,0] + lambda(2)*[2,0,0;0,2,0;0,0,0] +lambda(3)*[0,0,0;0,0,0;0,0,2] + lambda(4)*[6*x(1),0,0;0,0,0;0,0,0] + lambda(5)*[0,0,0;0,2,0;0,0,2];
+  //	endfunction
+  //
+  //    //Gradient of Non-Linear Constraints
+  //	function [cg,ceqg] = cGrad(x)
+  //		cg = [2*x(1),0,0;2*x(1),2*x(2),0;0,0,2*x(3)];
+  //		ceqg = [3*x(1)^2,0,0;0,2*x(2),2*x(3)];
+  //	endfunction
+  //
+  //    //Calling IPopt
+  //	[x,fval,exitflag,output,lambda,grad,hessian,zl,zu] =fmincon(f, x0,A,b,Aeq,beq,lb,ub,nlc,options,fGrad,lHess,cGrad)
   //
   // Authors
   // R.Vidyadhar , Vignesh Kannan
@@ -118,17 +266,18 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    	[lhs , rhs] = argn();
 	
 	//To check the number of argument given by user
-   	if ( rhs<4 | rhs>14 ) then
-    		errmsg = msprintf(gettext("%s: Unexpected number of input arguments : %d provided while it should be 4,6,8,10,11,12,13,14,15"), "fmincon", rhs);
+   	if ( rhs<4 | rhs>13 ) then
+    		errmsg = msprintf(gettext("%s: Unexpected number of input arguments : %d provided while it should be 4,6,8,9,10,11,12,13"), "fmincon", rhs);
     		error(errmsg)
    	end
-    if (rhs==5 | rhs==7 | rhs==9) then
-    	errmsg = msprintf(gettext("%s: Unexpected number of input arguments : %d provided while it should be 4,6,8,10,11,12,13,14,15"), "fmincon", rhs);
+    	
+	if (rhs==5 | rhs==7) then
+    	errmsg = msprintf(gettext("%s: Unexpected number of input arguments : %d provided while it should be 4,6,8,9,10,11,12,13"), "fmincon", rhs);
     	error(errmsg)
    	end
  
 	//Storing the Input Parameters  
-   	_f    	 = varargin(1);
+   	f    	 = varargin(1);
    	x0   	 = varargin(2);
    	A    	 = varargin(3);
    	b    	 = varargin(4);
@@ -136,24 +285,24 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    	beq  	 = [];
    	lb       = [];
    	ub       = [];
-   	no_nlic  =[];
-   	_nlc     = [];
+   	nlc     = [];
    	
    	if (rhs>4) then
    		Aeq  	 = varargin(5);
    		beq  	 = varargin(6);
    	end
+
    	if (rhs>6) then
    		lb       = varargin(7);
    		ub       = varargin(8);
    	end
+
    	if (rhs>8) then
-   		no_nlic   = varargin(9);
-   		_nlc      = varargin(10);
+   		nlc      = varargin(9);
 	end
 	 
-	//To check whether the 1st Input argument (_f) is a function or not
-   	if (type(_f) ~= 13 & type(_f) ~= 11) then
+	//To check whether the 1st Input argument (f) is a function or not
+   	if (type(f) ~= 13 & type(f) ~= 11) then
    		errmsg = msprintf(gettext("%s: Expected function for Objective (1st Parameter) "), "fmincon");
    		error(errmsg);
    	end
@@ -169,15 +318,16 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    		errmsg = msprintf(gettext("%s: Expected Row Vector or Column Vector for x0 (Starting Point) or Starting Point cannot be Empty"), "fmincon");
    		error(errmsg);
     end
+
    	if(size(x0,2)==1) then
    		x0=x0';		//Converting x0 to row vector, if it is column vector
    	else 
    	 	x0=x0;		//Retaining the same, if it is already row vector
    	end   	 	
-    s=size(x0);
+    	s=size(x0);
   	
-  	//To check the match between _f (1st Parameter) & x0 (2nd Parameter)
-   	if(execstr('init=_f(x0)','errcatch')==21) then
+  	//To check the match between f (1st Parameter) & x0 (2nd Parameter)
+   	if(execstr('init=f(x0)','errcatch')==21) then
 		errmsg = msprintf(gettext("%s: Objective function and x0 did not match"), "fmincon");
    		error(errmsg);
 	end
@@ -193,6 +343,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    		errmsg = msprintf(gettext("%s: Expected Matrix of size (No of Linear Inequality Constraints X No of Variables) or an Empty Matrix for Linear Inequality Constraint coefficient Matrix A"), "fmincon");
    		error(errmsg);
    	end
+
    	s1=size(A);
    	
 	//To check whether the 4th Input argument (b) is a Vector/Scalar
@@ -207,7 +358,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
     		errmsg = msprintf(gettext("%s: As Linear Inequality Constraint coefficient Matrix A (3rd parameter) is empty, b (4th Parameter) should also be empty"), "fmincon");
    			error(errmsg);
    		end
-   	else
+	else
    		if((size(b,1)~=1) & (size(b,2)~=1)) then
    			errmsg = msprintf(gettext("%s: Expected Non empty Row/Column Vector for b (4th Parameter) for your Inputs "), "fmincon");
    			error(errmsg);
@@ -235,6 +386,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    		errmsg = msprintf(gettext("%s: Expected Matrix of size (No of Linear Equality Constraints X No of Variables) or an Empty Matrix for Linear Equality Constraint coefficient Matrix Aeq"), "fmincon");
    		error(errmsg);
    	end
+
    	s2=size(Aeq);
 
 	//To check whether the 6th Input argument(beq) is a Vector/Scalar
@@ -275,7 +427,7 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
   	
   	//To check for correct size and data of lb (7th paramter) and Converting it to Column Vector as required by Ipopt
    	if (size(lb,2)==0) then
-        lb = repmat(-%inf,1,s(2));
+        	lb = repmat(-%inf,1,s(2));
     end
     
    	if (size(lb,1)~=1) & (size(lb,2)~=1) then
@@ -325,69 +477,77 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 		   	errmsg = msprintf(gettext("%s: Value of Lower Bound can not be infinity"), "fmincon");
     		error(errmsg); 
   		end	
+
 		if (ub(i) == -%inf) then
 		   	errmsg = msprintf(gettext("%s: Value of Upper Bound can not be negative infinity"), "fmincon");
     		error(errmsg); 
 		end	
+
 		if(ub(i)-lb(i)<=1e-6) then
 			errmsg = msprintf(gettext("%s: Difference between Upper Bound and Lower bound should be atleast > 10^6 for variable No.= %d "), "fmincon", i);
     		error(errmsg)
     	end
 	end
   	
-  	//To check whether the 9th Input argument (no_nlic) is a Scalar
-   	if (type(no_nlic) ~= 1) then
-   		errmsg = msprintf(gettext("%s: Expected Scalar for no. of non Linear inequality constraints (9th Parameter)"), "fmincon");
-   		error(errmsg);
-  	end
-  	
-  	//To check whether the 10th Input argument (_nlc) is a function or an empty Matrix
-   	if (size(no_nlic,1)==1 & size(no_nlic,2)==1) then
-   		if (type(_nlc) ~= 13 & type(_nlc) ~= 11) then
-   			errmsg = msprintf(gettext("%s: Expected function for non Linear Constraints (10th Parameter) "), "fmincon");
-   			error(errmsg);
-   		end
-   		no_nlc=1;
-	elseif (size(no_nlic,2)==0) then	
-		no_nlic=0;
-		no_nlc=0;
-		if (type(_nlc)~=1) then
-			errmsg = msprintf(gettext("%s: As no. of Non Linear Inequality Constraints (9th Parameter) is empty, non linear constraint function (10th Parameter) should also be empty"), "fmincon");
-   			error(errmsg);
-   		end
-   		if (size(_nlc,2)~=0) then
-   		errmsg = msprintf(gettext("%s: As no. of Non Linear Inequality Constraints (9th Parameter) is empty, non linear constraint function (10th Parameter) should also be empty"), "fmincon");
-   			error(errmsg);
-   		end
-   	else
-		errmsg = msprintf(gettext("%s: Expected scalar or Empty matrix for no. of non linear inequality constraints (9th Parameter)"), "fmincon");
-    	error(errmsg); 
-   	end
-	
-	//Returns "Invalid Index" Error if size of x0 is not matched with _nlc(10th Parameter)
-   	if (no_nlc==1) then
-   		if(execstr('init1=_nlc(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Non-Linear Constraint function(9th Parameter) and x0(2nd Parameter) did not match "), "fmincon");
+	//To check whether the 10th Input argument (nlc) is a function or an empty Matrix
+	if (type(nlc) == 1 & size(nlc,2)==0 ) then
+  		addnlc=[];
+  		no_nlc=0;
+  		no_nlic=0;
+		no_nlec=0;
+  	elseif (type(nlc) == 13 | type(nlc) == 11) then
+  		
+  		if(execstr('[sample_c,sample_ceq] = nlc(x0)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Non-Linear Constraint function(9th Parameter) and x0(2nd Parameter) did not match"), "fmincon");
    			error(errmsg);
 		end
-   		init1=_nlc(x0);
-   		no_nlc=size(init1,1);
-   		if(no_nlc<no_nlic)
-   			errmsg = msprintf(gettext("%s: Error--->Total no. of Non linear Constraints is < than no. of Non linear Inequality Constraints "), "fmincon");
+  		[sample_c,sample_ceq] = nlc(x0);
+  		
+  		if (size(sample_c,1)~=1 & size(sample_c,1)~=0) then
+  			errmsg = msprintf(gettext("%s: Definition of c in Non-Linear Constraint function(9th Parameter) should be in the form of Row Vector or Empty Vector"), "fmincon");
+    		error(errmsg)
+    	end
+  		
+  		if (size(sample_ceq,1)~=1 & size(sample_ceq,1)~=0) then
+  			errmsg = msprintf(gettext("%s: Definition of ceq in Non-Linear Constraint function(9th Parameter) should be in the form of Row Vector or Empty Vector"), "fmincon");
+    		error(errmsg)
+    	end
+    	
+  		no_nlic = size(sample_c,2);
+  		no_nlec = size(sample_ceq,2);
+  		no_nlc = no_nlic + no_nlec;
+  		
+  		function allcon = addnlc(x)
+  			[c,ceq] = nlc(x);
+  			allcon = [c';ceq'];
+  		endfunction
+  		
+  		if(execstr('sample_allcon = addnlc(x0)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Non-Linear Constraint function(9th Parameter) and x0(2nd Parameter) did not match"), "fmincon");
    			error(errmsg);
 		end
-   	end
-   	
+  		sample_allcon = addnlc(x0);
+  		
+  		if (size(sample_allcon,1)~=no_nlc | size(sample_allcon,2)~=1) then
+  			errmsg = msprintf(gettext("%s: Please check the Non-Linear Constraint function (9th Parameter) function"), "fmincon");
+    		error(errmsg)
+    	end
+    else 
+    	errmsg = msprintf(gettext("%s: Non Linear Constraint (9th Parameter) should be a function or an Empty Matrix"), "fmincon");
+    		error(errmsg)
+    end
+  		
+  
    	//To check, Whether Options is been entered by user   
-   	if ( rhs<11 ) then
+   	if ( rhs<10 ) then
       		param = list();
        else
-      		param =varargin(11); //Storing the 3rd Input Parameter in intermediate list named 'param'
+      		param =varargin(10); //Storing the 3rd Input Parameter in intermediate list named 'param'
     end
    
 	//If Options is entered then checking its type for 'list'   
    	if (type(param) ~= 15) then
-   		errmsg = msprintf(gettext("%s: Options (11th parameter) should be a list"), "fmincon");
+   		errmsg = msprintf(gettext("%s: Options (10th parameter) should be a list"), "fmincon");
    		error(errmsg);
    	end
    
@@ -399,17 +559,18 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 
 	//To set Default Value for Options, If User Doesn't enter Options
    	options = list(..
-      		"MaxIter"     , [1000000], ...
-      		"CpuTime"   , [60] ...
-      		);
+      		"MaxIter"     , [10000], ...
+      		"CpuTime"   , [600] ...
+		);
 
 	//Flags to check whether Gradient is "ON"/"OFF" & Hessian is "ON"/"OFF" 
    	flag1=0;
    	flag2=0;
    	flag3=0;
-   	_fg=[];
-   	_fh=[];
-   	_cg=[];
+   	fGrad=[];
+   	lHess=[];
+   	cGrad=[];
+	addcGrad=[];
    	
  
 	//To check the User Entry for Options and storing it
@@ -422,81 +583,81 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
         	case "GradObj" then
         				if (param(2*i)=="ON") then
         					//To check whether the user has provided Gradient function if Gradient Option is "ON"
-        					if (rhs<12) then      
+        					if (rhs<11) then      
 				     			errmsg = msprintf(gettext("%s: Gradient function of Objective is missing, but GradObj=ON"), "fmincon");
 				    			error(errmsg);     			
         					else
         						//This flag1 is activated(ie. =1) if Gradient is supplied
         						flag1=1;
-        						pos_fg=12;
-        						_fg=varargin(12);
+        						pos_fGrad=11;
+        						fGrad=varargin(11);
         					end
         				//To check whether Wrong entry(other than ON/OFF) is entered
         				elseif (param(2*i)~="ON" & param(2*i)~="OFF") then    
         					errmsg = msprintf(gettext("%s: Options for GradObj should be either ON or OFF"), "fmincon");
 						error(errmsg);     	
         				end
-        	case "HessObj" then
+        	case "Hessian" then
         				if (param(2*i)=="ON") then
         					//To check whether the user has provided Hessian function if Hessian Option is "ON"
 							if (flag1==0) then
-								if (rhs<12) then    
+								if (rhs<11) then    
 				     				errmsg = msprintf(gettext("%s: Hessian function of Objective is missing, but HessObj=ON"), "fmincon");
 				     				error(errmsg);		
         						else
         							//This flag is activated(ie. =1) if Hessian is supplied
         							flag2=1;
-        							pos_fh=12;
-        							_fh=varargin(12);
+        							pos_lHess=11;
+        							lHess=varargin(11);
         			    		end         			
         					elseif (flag1==1) then
-								if (rhs<13) then    
+								if (rhs<12) then    
 				     				errmsg = msprintf(gettext("%s: Hessian function of Objective is missing, but HessObj=ON"), "fmincon");
 				     				error(errmsg);     			
         						else
         							//This flag is activated(ie. =1) if Hessian is supplied
         							flag2=1;
-        							pos_fh=13;
-        							_fh=varargin(13);
+        							pos_lHess=12;
+        							lHess=varargin(12);
         			    		end
         			    	end       
         				//To check whether Wrong entry(other than ON/OFF) is entered	            
         				elseif (param(2*i)~="ON" & param(2*i)~="OFF") then    
         					errmsg = msprintf(gettext("%s: Options for HessObj should be either ON or OFF"), "fmincon");
 							error(errmsg);   
-        				end	
+        				end
         	case "GradCon" then
         				if (param(2*i)=="ON") then
         					//To check whether the user has provided Gradient function if Gradient Option is "ON"
         					if (flag1==0 & flag2==0) then
-        						if (rhs<12) then      
+        						if (rhs<11) then      
 				     				errmsg = msprintf(gettext("%s: Gradient function of Non-Linear Constraint is missing, but GradCon=ON"), "fmincon");
 				    				error(errmsg);     			
         						else
-        							pos_cg=12;
-        							//This flag is activated(ie. =1) if Hessian is supplied
+        							pos_cGrad=11;
+        							//This flag is activated(ie. =1) if Gradient is supplied
         							flag3=1;
-        							_cg=varargin(12);
+        							cGrad=varargin(11);
         						end
         					elseif((flag1==1 & flag2==0) |(flag1==0 & flag2==1) ) then
-        						if (rhs<13) then      
+        						if (rhs<12) then      
 				     				errmsg = msprintf(gettext("%s: Gradient function of Constraints is missing, but GradCon=ON"), "fmincon");
 				    				error(errmsg);    			
         						else
-        							pos_cg=13;
-        							//This flag is activated(ie. =1) if Hessian is supplied
+        							pos_cGrad=12;
+        							//This flag is activated(ie. =1) if Gradient is supplied
         							flag3=1;
-        							_cg=varargin(13);
+        							cGrad=varargin(12);
         						end
         					elseif(flag1==1 & flag2==1) then
-        						if (rhs<14) then      
+        						if (rhs<13) then      
 				     				errmsg = msprintf(gettext("%s: Gradient function of Constraints is missing, but GradCon=ON"), "fmincon");
 				    				error(errmsg);      			
         						else
-        							pos_cg=14;
-        							//This flag is activated(ie. =1) if Hessian is supplied
+        							pos_cGrad=13;
+        							//This flag is activated(ie. =1) if Gradient is supplied
         							flag3=1;
-        							_cg=varargin(14);
+        							cGrad=varargin(13);
         						end        					
         					end 	       				      
         			//To check whether Wrong entry(other than ON/OFF) is entered
@@ -512,99 +673,124 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
    
    
 	//Defining a function to calculate Gradient or Hessian if the respective user entry is OFF 
-   	function y=_gradhess(x,t)
+   	function y=gradhess(x,t)
 		if t==1 then	//To return Gradient
-			y=numderivative(_f,x)		
+			y=numderivative(f,x)		
 		elseif t==2 then		//To return Hessian]n
-			[grad,y]=numderivative(_f,x)
+			[grad,y]=numderivative(f,x)
 		elseif t==3 then	//To return Gradient
-			y=numderivative(_nlc,x)		
+			y=numderivative(addnlc,x)		
 		elseif t==4 then		//To return Hessian]n
-			[grad,y]=numderivative(_nlc,x)
+			[grad,y]=numderivative(addnlc,x)
 		end
    	endfunction
  
    //To check the correct no. of inputs given by the user	
    if (flag1==0 & flag2==0 & flag3==0)
-   		if(rhs>11) then
-        	errmsg = msprintf(gettext("%s: Only 11 Inputs are Needed for this option(GradObj=OFF, HessObj=OFF, GradCon=OFF), but %d were recorded"), "fmincon",rhs);
+   		if(rhs>10) then
+        	errmsg = msprintf(gettext("%s: Only 10 Inputs are Needed for this option(GradObj=OFF, HessObj=OFF, GradCon=OFF), but %d were recorded"), "fmincon",rhs);
 			error(errmsg); 
 		end
    elseif ((flag1==1 & flag2==0 & flag3==0) | (flag1==0 & flag2==1 & flag3==0) | (flag1==0 & flag2==0 & flag3==1)) then
-  		if(rhs>12) then
-        	errmsg = msprintf(gettext("%s: Only 12 Inputs were needed for this option, but %d were recorded"), "fmincon",rhs);
+  		if(rhs>11) then
+        	errmsg = msprintf(gettext("%s: Only 11 Inputs were needed for this option, but %d were recorded"), "fmincon",rhs);
 			error(errmsg);
 		end
    elseif ((flag1==1 & flag2==1 & flag3==0) | (flag1==0 & flag2==1 & flag3==1) | (flag1==1 & flag2==0 & flag3==1)) then
-   		if(rhs>13) then
-        	errmsg = msprintf(gettext("%s: Only 13 Inputs were needed for this option, but %d were recorded"), "fmincon",rhs);
+   		if(rhs>12) then
+        	errmsg = msprintf(gettext("%s: Only 12 Inputs were needed for this option, but %d were recorded"), "fmincon",rhs);
 			error(errmsg);
 		end
    elseif (flag1==1 & flag2==1 & flag3==1)
-   		if(rhs>14) then
-        	errmsg = msprintf(gettext("%s: Only 14 Inputs are Needed for this option(GradObj=ON, HessObj=ON, GradCon=ON), but %d were recorded"), "fmincon",rhs);
+   		if(rhs>13) then
+        	errmsg = msprintf(gettext("%s: Only 13 Inputs are Needed for this option(GradObj=ON, HessObj=ON, GradCon=ON), but %d were recorded"), "fmincon",rhs);
 			error(errmsg); 
 		end
 	end
 	
    //To check the correct input of Gradient and Hessian Functions from Users	     	
    if (flag1==1) then
-   		if (type(_fg) ~= 13 & type(_fg) ~= 11) then
+   		if (type(fGrad) ~= 11 & type(fGrad) ~= 13) then
   			errmsg = msprintf(gettext("%s: Expected function for Gradient of Objective, since GradObj=ON"), "fmincon");
    			error(errmsg);
    		end
-   		if(execstr('sample_fg=_fg(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 did not match "), "fmincon", rhs);
+   		if(execstr('sample_fGrad=fGrad(x0)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Gradient function of Objective and x0 did not match "), "fmincon");
    			error(errmsg);
 		end
-		sample_fg=_fg(x0);
-		if (size(sample_fg,1)~=1 | size(sample_fg,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Gradient function(%dth Parameter)---->Row Vector function is Expected"), "fmincon",pos_fg);
+		sample_fGrad=fGrad(x0);
+		if (size(sample_fGrad,1)==s(2) & size(sample_fGrad,2)==1) then
+		elseif (size(sample_fGrad,1)==1 & size(sample_fGrad,2)==s(2)) then
+		elseif (size(sample_fGrad,1)~=1 & size(sample_fGrad,2)~=1) then
+   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Gradient function(%dth Parameter)---->Vector function is Expected"), "fmincon",pos_fGrad);
    			error(errmsg);
    		end
-   	end
-   	if (flag2==1) then
-   		if (type(_fh) ~= 13 & type(_fh) ~= 11) then
-  			errmsg = msprintf(gettext("%s: Expected function for Hessian of Objective, since HessObj=ON"), "fmincon");
+   end
+   if (flag2==1) then
+   		if (type(lHess) ~= 11 & type(lHess) ~= 13) then
+  			errmsg = msprintf(gettext("%s: Expected function for Hessian of Objective, since Hessian=ON"), "fmincon");
    			error(errmsg);
    		end
-   		if(execstr('sample_fh=_fh(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 did not match "), "fmincon", rhs);
+   		if(execstr('sample_lHess=lHess(x0,1,1:no_nlc)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Hessian function of Objective and x0 did not match "), "fmincon");
    			error(errmsg);
 		end
-		sample_fh=_fh(x0);
-   		if(size(sample_fh,1)~=s(2) | size(sample_fh,2)~=s(2)) then
-   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Hessian function(%dth Parameter)---->Symmetric Matrix function is Expected "), "fmincon",pos_fh);
+		sample_lHess=lHess(x0,1,1:no_nlc);
+   		if(size(sample_lHess,1)~=s(2) | size(sample_lHess,2)~=s(2)) then
+   			errmsg = msprintf(gettext("%s: Wrong Input for Objective Hessian function(%dth Parameter)---->Symmetric Matrix function is Expected "), "fmincon",pos_lHess);
    			error(errmsg);
    		end
    	end
    	if (flag3==1) then
-   		if (type(_cg) ~= 13 & type(_cg) ~= 11) then
+   		if (type(cGrad) ~= 11 & type(cGrad) ~= 13) then
   			errmsg = msprintf(gettext("%s: Expected function for Gradient of Constraint function,since GradCon=ON"), "fmincon");
    			error(errmsg);
    		end
-   		if(execstr('sample_cg=_cg(x0)','errcatch')==21)
-			errmsg = msprintf(gettext("%s: Gradient function of Constraint and x0 did not match "), "fmincon", rhs);
+   		
+   		if(execstr('[sample_cGrad,sample_ceqg]=cGrad(x0)','errcatch')==21)
+			errmsg = msprintf(gettext("%s: Gradient function of Constraint and x0 did not match "), "fmincon");
    			error(errmsg);
 		end
-		sample_cg=_cg(x0);
-   		if(size(sample_cg,1)~=no_nlc*s(2) | size(sample_cg,2)~=1) then
-   			errmsg = msprintf(gettext("%s:  Wrong Input for Constraint Gradient function(%dth Parameter)---->Vector function is Expected (Refer Help)"), "fmincon",pos_cg);
+		[sample_cGrad,sample_ceqg]=cGrad(x0);
+		
+		if  (size(sample_cGrad,2)==0) then 		
+		elseif (size(sample_cGrad,1)~=no_nlic | size(sample_cGrad,2)~=s(2)) then
+   			errmsg = msprintf(gettext("%s: Definition of (cGrad) in Non-Linear Constraint function(%dth Parameter) should be in the form of (m X n) or Empty Matrix where m is no. of Non- linear Inequality Constraints and n is no. of Variables"), "fmincon",pos_cGrad);
+   			error(errmsg);		
+		end
+		
+		if (size(sample_ceqg,2)==0) then		
+		elseif (size(sample_ceqg,1)~=no_nlec | size(sample_ceqg,2)~=s(2)) then
+   			errmsg = msprintf(gettext("%s: Definition of (ceqg) in Non-Linear Constraint function(%dth Parameter) should be in the form of (m X n) or Empty Matrix where m is no. of Non- linear Equality Constraints and n is no. of Variables"), "fmincon",pos_cGrad);
+   			error(errmsg);
+		end
+
+		function allcongrad = addcGrad(x)
+  			[sample_cGrad,sample_ceqg] = cGrad(x);
+  			allcongrad=[sample_cGrad;sample_ceqg];
+  		endfunction
+   	
+   		sample_addcGrad=addcGrad(x0);
+		if(size(sample_addcGrad,1)~=no_nlc | size(sample_addcGrad,2)~=s(2)) then
+   			errmsg = msprintf(gettext("%s:  Wrong Input for Constraint Gradient function(%dth Parameter) (Refer Help)"), "fmincon",pos_cGrad);
    			error(errmsg);
    		end
    	end
    	
+   	empty=0;
+   	
+
    	//Calling the Ipopt Function for solving the above Problem
-    [xopt,fopt,status,iter,cpu,obj_eval,dual,lambda,gradient,hessian1] = solveminconp (_f,_gradhess,A,b,Aeq,beq,lb,ub,no_nlc,no_nlic,_nlc,flag1,_fg,flag2,_fh,flag3,_cg,x0,options)		
+    [xopt,fopt,status,iter,cpu,obj_eval,dual,lambda,zl,zu,gradient,hessian1] = solveminconp 					(f,gradhess,A,b,Aeq,beq,lb,ub,no_nlc,no_nlic,addnlc,flag1,fGrad,flag2,lHess,flag3,addcGrad,x0,options,empty)	
    
 	//Calculating the values for output   	
    	xopt = xopt';
-    	exitflag = status;
-    	output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
+    exitflag = status;
+    output = struct("Iterations", [],"Cpu_Time",[],"Objective_Evaluation",[],"Dual_Infeasibility",[]);
    	output.Iterations = iter;
-    	output.Cpu_Time = cpu;
-    	output.Objective_Evaluation = obj_eval;
-    	output.Dual_Infeasibility = dual;
+    output.Cpu_Time = cpu;
+    output.Objective_Evaluation = obj_eval;
+    output.Dual_Infeasibility = dual;
 
     //Converting hessian of order (1 x (numberOfVariables)^2) received from Ipopt to order (numberOfVariables x numberOfVariables)
     s=size(gradient)
@@ -620,10 +806,12 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
 		fopt=[]
 		output = struct("Iterations", [],"Cpu_Time",[]);
 		output.Iterations = iter;
-    		output.Cpu_Time = cpu;
+    	output.Cpu_Time = cpu;
 		lambda=[]
 		gradient=[]
 		hessian=[]
+		zl=[]
+		zu=[]
     end
 		
 
@@ -652,11 +840,11 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
         	printf("\nRestoration Failed!\n");
     	case 10 then
         	printf("\nError in step computation (regularization becomes too large?)!\n");
-    	case 12 then
+    	case 11 then
         	printf("\nProblem has too few degrees of freedom.\n");
-    	case 13 then
+    	case 12 then
         	printf("\nInvalid option thrown back by IPOpt\n");
-    	case 14 then
+    	case 13 then
         	printf("\nNot enough memory.\n");
     	case 15 then
         	printf("\nINTERNAL ERROR: Unknown SolverReturn value - Notify IPOPT Authors.\n");
@@ -667,12 +855,12 @@ function [xopt,fopt,exitflag,output,lambda,gradient,hessian] = fmincon (varargin
     
     //Remark for the user, If the gradient and hessian is send by the User
     if (no_nlc~=0) then
-		disp("||||||Please Make sure you have entered Correct No. of Non-linear Inequality Constraints (9th Parameter) & Non-linear Constraints Functions (10th Parameter) in proper order -->Scilab Will Calculate Based on your input only||||||");	
+		disp("||||||Please Make sure you have entered Correct Non-linear Constraints Functions (9th Parameter) in proper order -->Scilab Will Calculate Based on your input only||||||");	
     end
     
     //Remark for the user, If the gradient and hessian is send by the User
     if (flag1==1 |flag2==1 |flag3==1) then
-		disp("||||||Please Make sure you have entered Correct Functions for Gradient or Hessian -->Scilab Will Calculate Based on your input only||||||");
+		disp("||||||Please Make sure you have entered Correct Functions for Gradient or Hessian as per Help -->Scilab Will Calculate Based on your input only||||||");
     end
     		
 endfunction

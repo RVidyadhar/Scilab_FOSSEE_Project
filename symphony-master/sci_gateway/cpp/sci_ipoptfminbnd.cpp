@@ -31,7 +31,7 @@ int sci_solveminbndp(char *fname)
 	using namespace Ipopt;
 
 	CheckInputArgument(pvApiCtx, 5, 5); 
-	CheckOutputArgument(pvApiCtx, 7, 7);
+	CheckOutputArgument(pvApiCtx, 9, 9);
 	
 	// Error management variable
 	SciErr sciErr;
@@ -50,6 +50,8 @@ int sci_solveminbndp(char *fname)
 	
 	// Output arguments
 	double *fX = NULL, ObjVal=0,iteration=0,cpuTime=0,fobj_eval=0;
+	double *fZl=NULL;
+	double *fZu=NULL;
 	double dual_inf, constr_viol, complementarity, kkt_error;
 	int rstatus = 0;
 	int int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval;
@@ -135,45 +137,57 @@ int sci_solveminbndp(char *fname)
 	////////// Manage the output argument //////////
 
 
-		fX = Prob->getX();
-		ObjVal = Prob->getObjVal();
-		iteration = Prob->iterCount();
-		fobj_eval=(double)int_fobj_eval;
+	fX = Prob->getX();
+	ObjVal = Prob->getObjVal();
+	iteration = Prob->iterCount();
+	fobj_eval=(double)int_fobj_eval;
+	fZl = Prob->getZl();
+	fZu = Prob->getZu();
 
-		if (returnDoubleMatrixToScilab(1, 1, nVars, fX))
-		{
-			return 1;
-		}
+	if (returnDoubleMatrixToScilab(1, 1, nVars, fX))
+	{
+		return 1;
+	}
 
-		if (returnDoubleMatrixToScilab(2, 1, 1, &ObjVal))
-		{
-			return 1;
-		}
+	if (returnDoubleMatrixToScilab(2, 1, 1, &ObjVal))
+	{
+		return 1;
+	}
 
-		if (returnIntegerMatrixToScilab(3, 1, 1, &rstatus))
-		{
-			return 1;
-		}
-
-		if (returnDoubleMatrixToScilab(4, 1, 1, &iteration))
-		{
-			return 1;
-		}
+	if (returnIntegerMatrixToScilab(3, 1, 1, &rstatus))
+	{
+		return 1;
+	}
+	
+	if (returnDoubleMatrixToScilab(4, 1, 1, &iteration))
+	{
+		return 1;
+	}
 		
-		if (returnDoubleMatrixToScilab(5, 1, 1, &cpuTime))
-		{
-			return 1;
-		}
+	if (returnDoubleMatrixToScilab(5, 1, 1, &cpuTime))
+	{
+		return 1;
+	}
 	
-		if (returnDoubleMatrixToScilab(6, 1, 1, &fobj_eval))
-		{
-			return 1;
-		}
+	if (returnDoubleMatrixToScilab(6, 1, 1, &fobj_eval))
+	{
+		return 1;
+	}
 	
-		if (returnDoubleMatrixToScilab(7, 1, 1, &dual_inf))
-		{
-			return 1;
-		}
+	if (returnDoubleMatrixToScilab(7, 1, 1, &dual_inf))
+	{
+		return 1;
+	}
+
+	if (returnDoubleMatrixToScilab(8, 1, nVars, fZl))
+	{
+		return 1;
+	}
+
+	if (returnDoubleMatrixToScilab(9, 1, nVars, fZu))
+	{
+		return 1;
+	}
 
 
 	return 0;

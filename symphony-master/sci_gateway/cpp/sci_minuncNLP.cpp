@@ -97,7 +97,7 @@ bool minuncNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
   	{
 		return 1;
  	}
-  	char name[20]="_f";
+  	char name[20]="f";
   	double obj=0;
   	double *xNew=x;
   	createMatrixOfDouble(pvApiCtx, 7, 1, numVars_, xNew);
@@ -138,7 +138,7 @@ bool minuncNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f
   		int numberOfRhsOnScilabFunction = 2;
   		int numberOfLhsOnScilabFunction = 1;
   		int pointerOnScilabFunction     = *gradhessptr;
-		char name[20]="_gradhess";
+		char name[20]="gradhess";
  
   		C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
                                                                &numberOfLhsOnScilabFunction,
@@ -158,7 +158,7 @@ bool minuncNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f
   		int numberOfRhsOnScilabFunction = 1;
   		int numberOfLhsOnScilabFunction = 1;
   		int pointerOnScilabFunction     = *gradptr;
-		char name[20]="_g";
+		char name[20]="fGrad";
  	
   		C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
         	                                                       &numberOfLhsOnScilabFunction,
@@ -238,7 +238,7 @@ bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
   			int numberOfRhsOnScilabFunction = 2;
   			int numberOfLhsOnScilabFunction = 1;
   			int pointerOnScilabFunction     = *gradhessptr;
-			char name[20]="_gradhess";
+			char name[20]="gradhess";
   	
   			C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
                 	                                               &numberOfLhsOnScilabFunction,
@@ -258,7 +258,7 @@ bool minuncNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
   			int numberOfRhsOnScilabFunction = 1;
   			int numberOfLhsOnScilabFunction = 1;
   			int pointerOnScilabFunction     = *hessptr;
-			char name[20]="_h";
+			char name[20]="fHess";
   	
   			C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
                 	                                               &numberOfLhsOnScilabFunction,

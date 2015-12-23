@@ -31,6 +31,8 @@ using namespace Ipopt;
 minbndNLP::~minbndNLP()
 {
 	free(finalX_);
+	free(finalZu_);
+	free(finalZl_);
 }
 
 //get NLP info such as number of variables,constraints,no.of elements in jacobian and hessian to allocate memory
@@ -92,7 +94,7 @@ bool minbndNLP::eval_f(Index n, const Number* x, bool new_x, Number& obj_value)
   	{
 		return 1;
  	}
-  	char name[20]="_f";
+  	char name[20]="f";
   	double obj=0;
   	double *xNew=x;
   	createMatrixOfDouble(pvApiCtx, 3, 1, numVars_, xNew);
@@ -131,7 +133,7 @@ bool minbndNLP::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_f
   	int numberOfRhsOnScilabFunction = 2;
   	int numberOfLhsOnScilabFunction = 1;
   	int pointerOnScilabFunction     = *gradhessptr;
-	char name[20]="_gradhess";
+	char name[20]="gradhess";
  
   	C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
                                                                &numberOfLhsOnScilabFunction,
@@ -206,7 +208,7 @@ bool minbndNLP::eval_h(Index n, const Number* x, bool new_x,Number obj_factor, I
   		int numberOfRhsOnScilabFunction = 2;
   		int numberOfLhsOnScilabFunction = 1;
   		int pointerOnScilabFunction     = *gradhessptr;
-		char name[20]="_gradhess";
+		char name[20]="gradhess";
   
   		C2F(scistring)(&positionFirstElementOnStackForScilabFunction,name,
                                                                &numberOfLhsOnScilabFunction,
@@ -244,6 +246,18 @@ void minbndNLP::finalize_solution(SolverReturn status,Index n, const Number* x, 
     		 finalX_[i] = x[i];
 	}
 
+	finalZl_ = (double*)malloc(sizeof(double) * numVars_ * 1);
+	for (Index i=0; i<n; i++) 
+	{
+    		 finalZl_[i] = z_L[i];
+	}
+
+	finalZu_ = (double*)malloc(sizeof(double) * numVars_ * 1);
+	for (Index i=0; i<n; i++) 
+	{
+    		 finalZu_[i] = z_U[i];
+	}
+
 	finalObjVal_ = obj_value;
 	status_ = status;
 	if (status_ == 0 | status_ == 1 | status_ == 2)
@@ -261,6 +275,16 @@ const double * minbndNLP::getX()
 double minbndNLP::getObjVal()
 {	
 	return finalObjVal_;
+}
+
+const double * minbndNLP::getZl()
+{	
+	return finalZl_;
+}
+
+const double * minbndNLP::getZu()
+{	
+	return finalZu_;
 }
 
 double minbndNLP::iterCount()

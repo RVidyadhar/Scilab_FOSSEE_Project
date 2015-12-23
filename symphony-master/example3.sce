@@ -1,23 +1,10 @@
 function y=_f(x)
-	y=100*(x(2) - x(1)*x(1))*(x(2) - x(1)*x(1)) + (1 - x(1))*(1 - x(1));
+	y=-x^1.5
 endfunction
 
-x0 = [0.5,0];
-
-
+x1 = -10;
+x2 = -5;
 exec builder.sce
 exec loader.sce
 
-
-options=list("MaxIter", [1500], "CpuTime", [500], "Gradient", "OFF", "Hessian", "OFF");
-function y= _g(x)
-	y= [-400*x(1)*x(2) + 400*x(1)^3 + 2*x(1)-2, 200*(x(2)-x(1)^2)];
-endfunction
-
-function y= _h(x)
-	y= [1200*x(1)^2- 400*x(2) + 2, -400*x(1);-400*x(1), 200 ];
-endfunction
-
-
-[xopt,fopt,exitflag,status] = fminbnd(_f,[0,0],[1,1])
-
+[xopt,fopt,exitflag,status] = fminbnd(_f,x1,x2)

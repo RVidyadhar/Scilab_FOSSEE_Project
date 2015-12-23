@@ -30,8 +30,8 @@ int sci_solveminconp(char *fname)
 {
 	using namespace Ipopt;
 
-	CheckInputArgument(pvApiCtx, 19, 19);
-	CheckOutputArgument(pvApiCtx, 10, 10);
+	CheckInputArgument(pvApiCtx, 20, 20);
+	CheckOutputArgument(pvApiCtx, 12, 12);
 	
 	// Error management variable
 	SciErr sciErr;
@@ -55,6 +55,8 @@ int sci_solveminconp(char *fname)
 	double *fGrad =  NULL;
 	double *fHess =  NULL;
 	double *fLambda = NULL;
+	double *fZl=NULL;
+	double *fZu=NULL;
 	int rstatus = 0;
 	int int_fobj_eval, int_constr_eval, int_fobj_grad_eval, int_constr_jac_eval, int_hess_eval;
 
@@ -197,6 +199,8 @@ int sci_solveminconp(char *fname)
 	fGrad = Prob->getGrad();
 	fHess = Prob->getHess();
 	fLambda = Prob->getLambda();
+	fZl = Prob->getZl();
+	fZu = Prob->getZu();
 	ObjVal = Prob->getObjVal();
 	iteration = Prob->iterCount();
 
@@ -239,13 +243,23 @@ int sci_solveminconp(char *fname)
 	{
 		return 1;
 	}
-		
-	if (returnDoubleMatrixToScilab(9, 1, nVars, fGrad))
+
+	if (returnDoubleMatrixToScilab(9, 1, nVars, fZl))
 	{
 		return 1;
 	}
 
-	if (returnDoubleMatrixToScilab(10, 1, nVars*nVars, fHess))
+	if (returnDoubleMatrixToScilab(10, 1, nVars, fZu))
+	{
+		return 1;
+	}
+		
+	if (returnDoubleMatrixToScilab(11, 1, nVars, fGrad))
+	{
+		return 1;
+	}
+
+	if (returnDoubleMatrixToScilab(12, 1, nVars*nVars, fHess))
 	{
 		return 1;
 	}

@@ -1,0 +1,102 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>fminbnd</title>
+    <style type="text/css" media="all">
+      @import url("scilab_code.css");
+      @import url("xml_code.css");
+      @import url("c_code.css");
+      @import url("style.css");
+    </style>
+  </head>
+  <body>
+    <div class="manualnavbar">
+    <table width="100%"><tr>
+      <td width="30%">
+    	<span class="previous"><a href="section_0668c8d3b1fcce7c887f74c9a675937b.html">&lt;&lt; Symphony Toolbox</a></span>
+
+      </td>
+      <td width="40%" class="center">
+      	<span class="top"><a href="section_0668c8d3b1fcce7c887f74c9a675937b.html">Symphony Toolbox</a></span>
+
+      </td>
+      <td width="30%" class="next">
+      	<span class="next"><a href="fmincon.html">fmincon &gt;&gt;</a></span>
+
+      </td>
+    </tr></table>
+      <hr />
+    </div>
+
+
+
+    <span class="path"><a href="index.html">Symphony Toolbox</a> &gt;&gt; <a href="section_0668c8d3b1fcce7c887f74c9a675937b.html">Symphony Toolbox</a> &gt; fminbnd</span>
+
+    <br /><br />
+    <div class="refnamediv"><h1 class="refname">fminbnd</h1>
+    <p class="refpurpose">Solves a minimum of single-variable function on open bounded interval</p></div>
+
+
+<div class="refsynopsisdiv"><h3 class="title">Calling Sequence</h3>
+   <div class="synopsis"><pre><span class="default">xopt</span><span class="default"> = </span><span class="functionid">fminbnd</span><span class="default">(</span><span class="default">_f</span><span class="default">,</span><span class="default">x1</span><span class="default">,</span><span class="default">x2</span><span class="default">)</span>
+<span class="default">xopt</span><span class="default"> = </span><span class="functionid">fminbnd</span><span class="default">(</span><span class="default">_f</span><span class="default">,</span><span class="default">x1</span><span class="default">,</span><span class="default">x2</span><span class="default">,</span><span class="default">options</span><span class="default">)</span>
+<span class="default">[</span><span class="default">xopt</span><span class="default">,</span><span class="default">fopt</span><span class="default">] = </span><span class="functionid">fminbnd</span><span class="default">(.....)</span>
+<span class="default">[</span><span class="default">xopt</span><span class="default">,</span><span class="default">fopt</span><span class="default">,</span><span class="default">exitflag</span><span class="default">]= </span><span class="functionid">fminbnd</span><span class="default">(.....)</span>
+<span class="default">[</span><span class="default">xopt</span><span class="default">,</span><span class="default">fopt</span><span class="default">,</span><span class="default">exitflag</span><span class="default">,</span><span class="default">output</span><span class="default">]=</span><span class="functionid">fminbnd</span><span class="default">(.....)</span>
+<span class="default">[</span><span class="default">xopt</span><span class="default">,</span><span class="default">fopt</span><span class="default">,</span><span class="default">exitflag</span><span class="default">,</span><span class="default">output</span><span class="default">,</span><span class="default">zl</span><span class="default">,</span><span class="default">zu</span><span class="default">]=</span><span class="functionid">fminbnd</span><span class="default">(.....)</span></pre></div></div>
+
+<div class="refsection"><h3 class="title">Parameters</h3>
+   <dl><dt><span class="term">_f :</span>
+      <dd><p class="para">a function, representing objective function of the problem</p></dd></dt>
+   <dt><span class="term">x1 :</span>
+      <dd><p class="para">a scalar or vector(1 X 1), containing lower bound</p></dd></dt>
+   <dt><span class="term">x2 :</span>
+      <dd><p class="para">a scalar or vector(1 X 1), containing upper bound</p></dd></dt>
+   <dt><span class="term">options :</span>
+      <dd><p class="para">a list, containing option for user to specify -Maximum iteration, Maximum CPU-time, TolX</p></dd></dt>
+   <dt><span class="term">xopt :</span>
+      <dd><p class="para">a vector of doubles, the computed solution of the optimization problem.</p></dd></dt>
+   <dt><span class="term">fopt :</span>
+      <dd><p class="para">a double, the function value at x.</p></dd></dt>
+   <dt><span class="term">exitflag :</span>
+      <dd><p class="para">Integer identifying the reason the algorithm terminated.</p></dd></dt>
+   <dt><span class="term">output   :</span>
+      <dd><p class="para">Structure containing information about the optimization.</p></dd></dt>
+   <dt><span class="term">zl :</span>
+      <dd><p class="para">a vector of doubles, containing lower bound multipliers</p></dd></dt>
+   <dt><span class="term">zu :</span>
+      <dd><p class="para">a vector of doubles, containing upper bound multipliers</p></dd></dt></dl></div>
+
+<div class="refsection"><h3 class="title">Description</h3>
+   <p class="para">Search the minimum of a multi-variable function on a closed bounded interval specified by :
+find the minimum of f(x) such that</p>
+   <p class="para"></p>
+   <p class="para">We are calling IPOpt for solving the unconstrained problem, IPOpt is a library written in C++. The code has been written by ​Andreas Wächter and ​Carl Laird.</p>
+   <p class="para"></p>
+   <p class="para"></p></div>
+
+<div class="refsection"><h3 class="title">Authors</h3>
+   <ul class="itemizedlist"><li class="member">R.Vidyadhar , Vignesh Kannan</li>
+   <li class="member">To check the number of input and output argument</li></ul></div>
+    <br />
+
+    <div class="manualnavbar">
+    <table width="100%">
+    <tr><td colspan="3" class="next"><a href="http://bugzilla.scilab.org/enter_bug.cgi?product=Scilab%20software&component=Documentation%20pages" class="ulink">Report an issue</a></td></tr>
+<tr>
+      <td width="30%">
+    	<span class="previous"><a href="section_0668c8d3b1fcce7c887f74c9a675937b.html">&lt;&lt; Symphony Toolbox</a></span>
+
+      </td>
+      <td width="40%" class="center">
+      	<span class="top"><a href="section_0668c8d3b1fcce7c887f74c9a675937b.html">Symphony Toolbox</a></span>
+
+      </td>
+      <td width="30%" class="next">
+      	<span class="next"><a href="fmincon.html">fmincon &gt;&gt;</a></span>
+
+      </td>
+    </tr></table>
+      <hr />
+    </div>
+  </body>
+</html>
